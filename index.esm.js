@@ -303,6 +303,7 @@ class NullLogger extends LoggerBase {
 }
 
 export {
+	Log,
 	LoggerBase,
 	ChainLogger,
 	ArrayLogger,

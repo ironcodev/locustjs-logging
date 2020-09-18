@@ -3,7 +3,7 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.NullLogger = exports.DomLogger = exports.ConsoleLogger = exports.ArrayLogger = exports.ChainLogger = exports.LoggerBase = void 0;
+exports.NullLogger = exports.DomLogger = exports.ConsoleLogger = exports.ArrayLogger = exports.ChainLogger = exports.LoggerBase = exports.Log = void 0;
 
 var _locustjsBase = require("locustjs-base");
 
@@ -43,6 +43,8 @@ var Log = function Log(category, data, host, client, exception) {
   this.client = (0, _locustjsBase.isString)(client) ? client : '';
   this.exception = (0, _locustjsBase.isEmpty)(exception) ? undefined : new _locustjsException.Exception(exception);
 };
+
+exports.Log = Log;
 
 var LoggerBase = /*#__PURE__*/function () {
   function LoggerBase() {
