@@ -1,0 +1,30 @@
+{
+  "name": "locustjs-logging",
+  "version": "1.0.0",
+  "description": "This library provides various types of loggers that could be employed in any type of front-end application.",
+  "main": "index.cjs.js",
+  "module": "index.esm.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ironcodev/locustjs-logging.git"
+  },
+  "keywords": [
+    "javascript",
+    "locustjs",
+    "logging",
+    "logger"
+  ],
+  "author": "Iron Code",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ironcodev/locustjs-logging/issues"
+  },
+  "homepage": "https://github.com/ironcodev/locustjs-logging#readme",
+  "dependencies": {
+    "locustjs-enum": "^1.0.1",
+    "locustjs-exception": "^1.0.1"
+  }
+}
