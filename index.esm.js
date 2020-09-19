@@ -1,4 +1,4 @@
-import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement  } from 'locustjs-base';
+import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement } from 'locustjs-base';
 import {
     Exception,
     throwIfNotInstanceOf,
@@ -52,13 +52,13 @@ class LoggerBase {
                         break;
                     case 2:
                         isLog = (hasData && hasCategory) ||
-                                (hasData && hasHost) ||
-                                (hasData && hasException);
+                            (hasData && hasHost) ||
+                            (hasData && hasException);
                         break;
                     case 3:
                         isLog = (hasData && hasCategory && hasHost) ||
-                                (hasData && hasCategory && hasException) ||
-                                (hasData && hasHost && hasException);
+                            (hasData && hasCategory && hasException) ||
+                            (hasData && hasHost && hasException);
                         break;
                     case 4:
                         isLog = (hasData && hasCategory && hasHost && hasException);
@@ -313,6 +313,74 @@ class NullLogger extends LoggerBase {
     clear() { }
 }
 
+class DynamicLogger extends LoggerBase {
+    constructor(options) {
+        super();
+
+        this.options = Object.assign({
+            DomTarget: '#logs',
+            CustomLogger: null
+        }, options);
+        this._type = '';
+        this._instance = null;
+    }
+    get type() {
+        return this._type;
+    }
+    set type(value) {
+        if (isString(value)) {
+            const ok = true;
+
+            value = value.toLowerCase();
+
+            switch (value) {
+                case 'console':
+                    this._instance = new ConsoleLogger();
+                    break;
+                case 'dom':
+                    this._instance = new DomLogger(this.options.DomTarget);
+                    break;
+                case 'null':
+                    this._instance = null;
+                case 'array':
+                    this._instance = new ArrayLogger();
+                    break;
+                case 'custom':
+                    if (isFunction(this.options.CustomLogger)) {
+                        try {
+                            this._instance = this.options.CustomLogger();
+
+                            if (!(this._instance instanceof LoggerBase)) {
+                                this._instance = null;
+                                ok = false;
+                            }
+                        } catch {
+                            this._instance = null;
+                            ok = false;
+                        }
+                    } else {
+                        ok = false;
+                    }
+                default:
+                    ok = false;
+                    throw 'invalid logger type.'
+            }
+
+            this._type = ok ? value: '';
+        }
+    }
+    _logInternal(type, log) {
+        if (this._instance) {
+            this._instance._logInternal(type, log);
+        }
+    }
+    clear() {
+        if (this._instance) {
+            this._instance.clear();
+        }
+    }
+}
+
 export {
     Log,
     LoggerBase,
@@ -320,5 +388,6 @@ export {
     ArrayLogger,
     ConsoleLogger,
     DomLogger,
-    NullLogger
+    NullLogger,
+    DynamicLogger
 }

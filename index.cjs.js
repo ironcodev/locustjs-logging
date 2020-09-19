@@ -3,11 +3,13 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.NullLogger = exports.DomLogger = exports.ConsoleLogger = exports.ArrayLogger = exports.ChainLogger = exports.LoggerBase = exports.Log = void 0;
+exports.DynamicLogger = exports.NullLogger = exports.DomLogger = exports.ConsoleLogger = exports.ArrayLogger = exports.ChainLogger = exports.LoggerBase = exports.Log = void 0;
 
 var _locustjsBase = require("locustjs-base");
 
 var _locustjsException = require("locustjs-exception");
+
+function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
@@ -511,3 +513,95 @@ var NullLogger = /*#__PURE__*/function (_LoggerBase2) {
 }(LoggerBase);
 
 exports.NullLogger = NullLogger;
+
+var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
+  _inherits(DynamicLogger, _LoggerBase3);
+
+  var _super6 = _createSuper(DynamicLogger);
+
+  function DynamicLogger(options) {
+    var _this4;
+
+    _classCallCheck(this, DynamicLogger);
+
+    _this4 = _super6.call(this);
+    _this4.options = Object.assign({
+      DomTarget: '#logs',
+      CustomLogger: null
+    }, options);
+    _this4._type = '';
+    _this4._instance = null;
+    return _this4;
+  }
+
+  _createClass(DynamicLogger, [{
+    key: "_logInternal",
+    value: function _logInternal(type, log) {
+      if (this._instance) {
+        this._instance._logInternal(type, log);
+      }
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      if (this._instance) {
+        this._instance.clear();
+      }
+    }
+  }, {
+    key: "type",
+    get: function get() {
+      return this._type;
+    },
+    set: function set(value) {
+      if ((0, _locustjsBase.isString)(value)) {
+        var ok = true;
+        value = value.toLowerCase();
+
+        switch (value) {
+          case 'console':
+            this._instance = new ConsoleLogger();
+            break;
+
+          case 'dom':
+            this._instance = new DomLogger(this.options.DomTarget);
+            break;
+
+          case 'null':
+            this._instance = null;
+
+          case 'array':
+            this._instance = new ArrayLogger();
+            break;
+
+          case 'custom':
+            if ((0, _locustjsBase.isFunction)(this.options.CustomLogger)) {
+              try {
+                this._instance = this.options.CustomLogger();
+
+                if (!_instanceof(this._instance, LoggerBase)) {
+                  this._instance = null;
+                  ok = (_readOnlyError("ok"), false);
+                }
+              } catch {
+                this._instance = null;
+                ok = (_readOnlyError("ok"), false);
+              }
+            } else {
+              ok = (_readOnlyError("ok"), false);
+            }
+
+          default:
+            ok = (_readOnlyError("ok"), false);
+            throw 'invalid logger type.';
+        }
+
+        this._type = ok ? value : '';
+      }
+    }
+  }]);
+
+  return DynamicLogger;
+}(LoggerBase);
+
+exports.DynamicLogger = DynamicLogger;
