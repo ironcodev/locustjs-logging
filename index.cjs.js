@@ -33,14 +33,13 @@ function _instanceof(left, right) { if (right != null && typeof Symbol !== "unde
 
 function _classCallCheck(instance, Constructor) { if (!_instanceof(instance, Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var Log = function Log(category, data, host, client, exception) {
+var Log = function Log(category, data, host, exception) {
   _classCallCheck(this, Log);
 
   this.category = (0, _locustjsBase.isString)(category) ? category : '';
   this.data = data;
   this.host = (0, _locustjsBase.isString)(host) ? host : '';
   this.date = new Date();
-  this.client = (0, _locustjsBase.isString)(client) ? client : '';
   this.exception = (0, _locustjsBase.isEmpty)(exception) ? undefined : new _locustjsException.Exception(exception);
 };
 
@@ -53,7 +52,6 @@ var LoggerBase = /*#__PURE__*/function () {
     (0, _locustjsException.throwIfInstantiateAbstract)(LoggerBase, this);
     this.category = '';
     this.host = '';
-    this.client = '';
   }
 
   _createClass(LoggerBase, [{
@@ -68,24 +66,22 @@ var LoggerBase = /*#__PURE__*/function () {
       var arg0 = args[0],
           arg1 = args[1],
           arg2 = args[2],
-          arg3 = args[3],
-          arg4 = args[4];
+          arg3 = args[3];
 
       if ((0, _locustjsBase.isString)(arg0) && args.length == 1) {
         result = new Log(this.category, arg0);
       } else if (_instanceof(arg0, Log)) {
         result = arg0;
       } else if (_instanceof(arg0, _locustjsException.Exception)) {
-        result = new Log(this.category, null, this.host, this.client, arg0);
+        result = new Log(this.category, null, this.host, arg0);
       } else if (_instanceof(arg0, Error)) {
-        result = new Log(this.category, null, this.host, this.client, new _locustjsException.Exception(arg0));
+        result = new Log(this.category, null, this.host, new _locustjsException.Exception(arg0));
       } else {
         if ((0, _locustjsBase.isObject)(arg0)) {
           var propCount = Object.keys(arg0);
           var hasData = arg0.data != null;
           var hasCategory = arg0.category != null;
           var hasHost = arg0.host != null;
-          var hasClient = arg0.client != null;
           var hasException = arg0.exception != null;
           var isLog = false;
 
@@ -95,29 +91,25 @@ var LoggerBase = /*#__PURE__*/function () {
               break;
 
             case 2:
-              isLog = hasData && hasCategory || hasData && hasHost || hasData && hasClient || hasData && hasException;
+              isLog = hasData && hasCategory || hasData && hasHost || hasData && hasException;
               break;
 
             case 3:
-              isLog = hasData && hasCategory && hasHost || hasData && hasCategory && hasClient || hasData && hasCategory && hasException || hasData && hasHost && hasClient || hasData && hasHost && hasException || hasData && hasClient && hasException;
+              isLog = hasData && hasCategory && hasHost || hasData && hasCategory && hasException || hasData && hasHost && hasException;
               break;
 
             case 4:
-              isLog = hasData && hasCategory && hasHost && hasException || hasData && hasCategory && hasHost && hasClient || hasData && hasCategory && hasClient && hasException || hasData && hasHost && hasClient && hasException;
-              break;
-
-            case 5:
-              isLog = hasData && hasCategory && hasHost && hasClient && hasException;
+              isLog = hasData && hasCategory && hasHost && hasException;
               break;
           }
 
           if (isLog) {
-            result = new Log(arg0.category, arg0.data, arg0.host, arg0.client, arg0.exception);
+            result = new Log(arg0.category, arg0.data, arg0.host, arg0.exception);
           } else {
-            result = new Log(this.category, arg0, arg1 || this.host, arg2 || this.client, arg3);
+            result = new Log(this.category, arg0, arg1, arg2);
           }
         } else {
-          result = new Log(arg0 || this.category, arg1, arg2 || this.host, arg3 || this.client, arg4);
+          result = new Log(arg0 || this.category, arg1, arg2 || this.host, arg3);
         }
       }
 
@@ -400,6 +392,10 @@ var DomLogger = /*#__PURE__*/function (_ChainLogger3) {
     _this3 = _super4.call(this, next);
     _this3.target = target;
 
+    if ((0, _locustjsBase.isString)(_this3.target)) {
+      _this3.target = _this3.target.trim();
+    }
+
     _this3._init();
 
     return _this3;
@@ -421,44 +417,62 @@ var DomLogger = /*#__PURE__*/function (_ChainLogger3) {
       return date.getFullYear() + "/" + date.getMonth() + "/" + date.getDay() + " " + date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds() + "." + date.getMilliseconds();
     }
   }, {
+    key: "_getTarget",
+    value: function _getTarget() {
+      var result;
+
+      if ((0, _locustjsBase.isjQueryElement)(this.target)) {
+        result = this.target[0];
+      } else {
+        if ((0, _locustjsBase.isSomeString)(this.target)) {
+          if (this.target[0] == '#' || this.target[0] == '.' || this.target.indexOf(' ') > 0) {
+            result = document.querySelector(this.target);
+          } else {
+            result = document.getElementById(this.target);
+          }
+        } else {
+          result = (0, _locustjsBase.isObject)(this.target) ? this.target : null;
+        }
+      }
+
+      return result;
+    }
+  }, {
     key: "_init",
     value: function _init() {
-      if ((0, _locustjsBase.isSomeString)(this.target)) {
-        var target = document.getElementById(this.target);
+      var target = this._getTarget();
 
-        if (target) {
-          target.innerHTML = "\n\t\t\t\t<table class=\"logs\">\n\t\t\t\t\t<tr>\n\t\t\t\t\t\t<td><b>client</b></td>\n\t\t\t\t\t\t<td><b>category</b></td>\n\t\t\t\t\t\t<td><b>data</b></td>\n\t\t\t\t\t\t<td><b>exception</b></td>\n\t\t\t\t\t\t<td><b>host</b></td>\n\t\t\t\t\t\t<td><b>date</b></td>\n\t\t\t\t\t</tr>\n\t\t\t\t</table>";
-        }
+      if (target) {
+        target.innerHTML = "\n              <table class=\"logs\">\n                  <thead>\n                      <tr>\n                          <th>Category</th>\n                          <th>Data</th>\n                          <th>Exception</th>\n                          <th>Host</th>\n                          <th>Date</th>\n                      </tr>\n                  </thead>\n                  <tbody>\n                  </tbody>\n              </table>";
       }
     }
   }, {
     key: "_logInternal",
     value: function _logInternal(type, log) {
-      if ((0, _locustjsBase.isSomeString)(this.target)) {
-        var target = document.getElementById(this.target);
+      var target = this._getTarget();
 
-        if (target) {
+      if (target && (0, _locustjsBase.isFunction)(target.querySelector)) {
+        var body = target.querySelector('table.logs tbody');
+
+        if (body) {
           var tr = document.createElement("TR");
-          var tdClient = document.createElement("TD");
           var tdCategory = document.createElement("TD");
           var tdData = document.createElement("TD");
           var tdHost = document.createElement("TD");
           var tdDate = document.createElement("TD");
           var tdException = document.createElement("TD");
-          tdClient.innerText = log.client;
           tdCategory.innerText = log.category;
           tdHost.innerText = log.host;
           tdData.innerHTML = this.formatData(log.data);
           tdDate.innerText = this.formatDate(log.date);
           tdException.innerHTML = this.formatException(log.exception);
           tr.setAttribute("class", type);
-          tr.appendChild(tdClient);
           tr.appendChild(tdCategory);
           tr.appendChild(tdData);
           tr.appendChild(tdException);
           tr.appendChild(tdHost);
           tr.appendChild(tdDate);
-          target.appendChild(tr);
+          body.appendChild(tr);
         }
       }
     }
