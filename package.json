@@ -1,6 +1,6 @@
 {
   "name": "locustjs-logging",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "This library provides various types of loggers that could be employed in any type of front-end application.",
   "main": "index.cjs.js",
   "module": "index.esm.js",
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/ironcodev/locustjs-logging#readme",
   "dependencies": {
+    "locustjs-base": "^1.0.10",
     "locustjs-enum": "^1.0.1",
     "locustjs-exception": "^1.0.1"
   }

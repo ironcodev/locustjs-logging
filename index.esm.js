@@ -1,18 +1,17 @@
-import { isEmpty, isObject, isString, isSomeString } from 'locustjs-base';
+import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement  } from 'locustjs-base';
 import {
-	Exception,
-	throwIfNotInstanceOf,
-	throwIfInstantiateAbstract,
-	throwNotImplementedException
+    Exception,
+    throwIfNotInstanceOf,
+    throwIfInstantiateAbstract,
+    throwNotImplementedException
 } from 'locustjs-exception';
 
 class Log {
-    constructor(category, data, host, client, exception) {
-        this.category = isString(category) ? category: '';
+    constructor(category, data, host, exception) {
+        this.category = isString(category) ? category : '';
         this.data = data;
-        this.host = isString(host) ? host: '';
+        this.host = isString(host) ? host : '';
         this.date = new Date();
-        this.client = isString(client) ? client : '';
         this.exception = isEmpty(exception) ? undefined : new Exception(exception);
     }
 }
@@ -23,28 +22,26 @@ class LoggerBase {
 
         this.category = '';
         this.host = '';
-        this.client = '';
     }
     _createLog(...args) {
         let result;
 
-        const [arg0, arg1, arg2, arg3, arg4] = args;
+        const [arg0, arg1, arg2, arg3] = args;
 
         if (isString(arg0) && args.length == 1) {
             result = new Log(this.category, arg0);
         } else if (arg0 instanceof Log) {
             result = arg0;
         } else if (arg0 instanceof Exception) {
-            result = new Log(this.category, null, this.host, this.client, arg0);
+            result = new Log(this.category, null, this.host, arg0);
         } else if (arg0 instanceof Error) {
-            result = new Log(this.category, null, this.host, this.client, new Exception(arg0));
+            result = new Log(this.category, null, this.host, new Exception(arg0));
         } else {
             if (isObject(arg0)) {
                 const propCount = Object.keys(arg0);
                 const hasData = arg0.data != null;
                 const hasCategory = arg0.category != null;
                 const hasHost = arg0.host != null;
-                const hasClient = arg0.client != null;
                 const hasException = arg0.exception != null;
 
                 let isLog = false;
@@ -56,35 +53,25 @@ class LoggerBase {
                     case 2:
                         isLog = (hasData && hasCategory) ||
                                 (hasData && hasHost) ||
-                                (hasData && hasClient) ||
                                 (hasData && hasException);
                         break;
                     case 3:
                         isLog = (hasData && hasCategory && hasHost) ||
-                                (hasData && hasCategory && hasClient) ||
                                 (hasData && hasCategory && hasException) ||
-                                (hasData && hasHost && hasClient) ||
-                                (hasData && hasHost && hasException) ||
-                                (hasData && hasClient && hasException);
+                                (hasData && hasHost && hasException);
                         break;
                     case 4:
-                        isLog = (hasData && hasCategory && hasHost && hasException) ||
-                                (hasData && hasCategory && hasHost && hasClient) ||
-                                (hasData && hasCategory && hasClient && hasException) ||
-                                (hasData && hasHost && hasClient && hasException);
-                        break;
-                    case 5:
-                        isLog = (hasData && hasCategory && hasHost && hasClient && hasException);
+                        isLog = (hasData && hasCategory && hasHost && hasException);
                         break;
                 }
 
                 if (isLog) {
-                    result = new Log(arg0.category, arg0.data, arg0.host, arg0.client, arg0.exception);
+                    result = new Log(arg0.category, arg0.data, arg0.host, arg0.exception);
                 } else {
-                    result = new Log(this.category, arg0, (arg1 || this.host), (arg2 || this.client), arg3);
+                    result = new Log(this.category, arg0, arg1, arg2);
                 }
             } else {
-                result = new Log((arg0 || this.category), arg1, (arg2 || this.host), (arg3 || this.client), arg4);
+                result = new Log((arg0 || this.category), arg1, (arg2 || this.host), arg3);
             }
         }
 
@@ -177,7 +164,7 @@ class ChainLogger extends LoggerBase {
 class ArrayLogger extends ChainLogger {
     constructor(next) {
         super(next);
-        
+
         this._logs = [];
     }
     _logInternal(type, log) {
@@ -207,94 +194,118 @@ class ConsoleLogger extends ChainLogger {
 }
 
 class DomLogger extends ChainLogger {
-  constructor(target, next) {
-    super(next);
+    constructor(target, next) {
+        super(next);
 
-    this.target = target;
-    this._init();
-  }
-  formatData(data) {
-    return isEmpty(data) ? "" : JSON.stringify(data, null, 3)
-									  .replace(/\n/g, "<br/>")
-									  .replace(/\s/g, "&nbsp;");
-  }
-  formatException(exception) {
-    return isEmpty(exception) ? "" : JSON.stringify(exception, null, 3)
-										  .replace(/\n/g, "<br/>")
-										  .replace(/\s/g, "&nbsp;");
-  }
-  formatDate(date) {
-    return (
-      date.getFullYear() +
-      "/" +
-      date.getMonth() +
-      "/" +
-      date.getDay() +
-      " " +
-      date.getHours() +
-      ":" +
-      date.getMinutes() +
-      ":" +
-      date.getSeconds() +
-      "." +
-      date.getMilliseconds()
-    );
-  }
-  _init() {
-	  if (isSomeString(this.target)) {
-		const target = document.getElementById(this.target);
+        this.target = target;
 
-		if (target) {
-		  target.innerHTML = `
-				<table class="logs">
-					<tr>
-						<td><b>client</b></td>
-						<td><b>category</b></td>
-						<td><b>data</b></td>
-						<td><b>exception</b></td>
-						<td><b>host</b></td>
-						<td><b>date</b></td>
-					</tr>
-				</table>`;
-		}
-	  }
-  }
-  _logInternal(type, log) {
-	  if (isSomeString(this.target)) {
-		const target = document.getElementById(this.target);
+        if (isString(this.target)) {
+            this.target = this.target.trim();
+        }
 
-		if (target) {
-		  const tr = document.createElement("TR");
-		  const tdClient = document.createElement("TD");
-		  const tdCategory = document.createElement("TD");
-		  const tdData = document.createElement("TD");
-		  const tdHost = document.createElement("TD");
-		  const tdDate = document.createElement("TD");
-		  const tdException = document.createElement("TD");
+        this._init();
+    }
+    formatData(data) {
+        return isEmpty(data) ? "" : JSON.stringify(data, null, 3)
+            .replace(/\n/g, "<br/>")
+            .replace(/\s/g, "&nbsp;");
+    }
+    formatException(exception) {
+        return isEmpty(exception) ? "" : JSON.stringify(exception, null, 3)
+            .replace(/\n/g, "<br/>")
+            .replace(/\s/g, "&nbsp;");
+    }
+    formatDate(date) {
+        return (
+            date.getFullYear() +
+            "/" +
+            date.getMonth() +
+            "/" +
+            date.getDay() +
+            " " +
+            date.getHours() +
+            ":" +
+            date.getMinutes() +
+            ":" +
+            date.getSeconds() +
+            "." +
+            date.getMilliseconds()
+        );
+    }
+    _getTarget() {
+        let result;
 
-		  tdClient.innerText = log.client;
-		  tdCategory.innerText = log.category;
-		  tdHost.innerText = log.host;
-		  tdData.innerHTML = this.formatData(log.data);
-		  tdDate.innerText = this.formatDate(log.date);
-		  tdException.innerHTML = this.formatException(log.exception);
+        if (isjQueryElement(this.target)) {
+            result = this.target[0];
+        } else {
+            if (isSomeString(this.target)) {
+                if (this.target[0] == '#' || this.target[0] == '.' || this.target.indexOf(' ') > 0) {
+                    result = document.querySelector(this.target);
+                } else {
+                    result = document.getElementById(this.target);
+                }
+            } else {
+                result = isObject(this.target) ? this.target : null;
+            }
+        }
 
-		  tr.setAttribute("class", type);
+        return result;
+    }
+    _init() {
+        const target = this._getTarget();
 
-		  tr.appendChild(tdClient);
-		  tr.appendChild(tdCategory);
-		  tr.appendChild(tdData);
-		  tr.appendChild(tdException);
-		  tr.appendChild(tdHost);
-		  tr.appendChild(tdDate);
+        if (target) {
+            target.innerHTML = `
+              <table class="logs">
+                  <thead>
+                      <tr>
+                          <th>Category</th>
+                          <th>Data</th>
+                          <th>Exception</th>
+                          <th>Host</th>
+                          <th>Date</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                  </tbody>
+              </table>`;
+        }
+    }
+    _logInternal(type, log) {
+        const target = this._getTarget();
 
-		  target.appendChild(tr);
-		}
-	  }
-  }
-  clear() {
-    this._init();
-  }
+        if (target && isFunction(target.querySelector)) {
+            const body = target.querySelector('table.logs tbody');
+
+            if (body) {
+                const tr = document.createElement("TR");
+                const tdCategory = document.createElement("TD");
+                const tdData = document.createElement("TD");
+                const tdHost = document.createElement("TD");
+                const tdDate = document.createElement("TD");
+                const tdException = document.createElement("TD");
+
+                tdCategory.innerText = log.category;
+                tdHost.innerText = log.host;
+                tdData.innerHTML = this.formatData(log.data);
+                tdDate.innerText = this.formatDate(log.date);
+                tdException.innerHTML = this.formatException(log.exception);
+
+                tr.setAttribute("class", type);
+
+                tr.appendChild(tdCategory);
+                tr.appendChild(tdData);
+                tr.appendChild(tdException);
+                tr.appendChild(tdHost);
+                tr.appendChild(tdDate);
+
+                body.appendChild(tr);
+            }
+        }
+    }
+    clear() {
+        this._init();
+    }
 }
 
 class NullLogger extends LoggerBase {
@@ -303,11 +314,11 @@ class NullLogger extends LoggerBase {
 }
 
 export {
-	Log,
-	LoggerBase,
-	ChainLogger,
-	ArrayLogger,
-	ConsoleLogger,
-	DomLogger,
-	NullLogger
+    Log,
+    LoggerBase,
+    ChainLogger,
+    ArrayLogger,
+    ConsoleLogger,
+    DomLogger,
+    NullLogger
 }
