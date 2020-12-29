@@ -3,15 +3,21 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.DynamicLogger = exports.NullLogger = exports.DomLogger = exports.ConsoleLogger = exports.ArrayLogger = exports.ChainLogger = exports.LoggerBase = exports.Log = void 0;
+exports.InvalidLoggerException = exports.InvalidLoggerTypeException = exports.NoLoggerFactoryException = exports.DynamicLogger = exports.NullLogger = exports.DomLogger = exports.ConsoleLogger = exports.ArrayLogger = exports.ChainLogger = exports.LoggerBase = exports.Log = void 0;
 
 var _locustjsBase = require("locustjs-base");
 
 var _locustjsException = require("locustjs-exception");
 
-function _readOnlyError(name) { throw new Error("\"" + name + "\" is read-only"); }
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+function _instanceof(left, right) { if (right != null && typeof Symbol !== "undefined" && right[Symbol.hasInstance]) { return !!right[Symbol.hasInstance](left); } else { return left instanceof right; } }
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!_instanceof(instance, Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -27,13 +33,53 @@ function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Re
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
-function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+var InvalidLoggerTypeException = /*#__PURE__*/function (_Exception) {
+  _inherits(InvalidLoggerTypeException, _Exception);
 
-function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+  var _super = _createSuper(InvalidLoggerTypeException);
 
-function _instanceof(left, right) { if (right != null && typeof Symbol !== "undefined" && right[Symbol.hasInstance]) { return !!right[Symbol.hasInstance](left); } else { return left instanceof right; } }
+  function InvalidLoggerTypeException() {
+    _classCallCheck(this, InvalidLoggerTypeException);
 
-function _classCallCheck(instance, Constructor) { if (!_instanceof(instance, Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+    return _super.apply(this, arguments);
+  }
+
+  return InvalidLoggerTypeException;
+}(_locustjsException.Exception);
+
+exports.InvalidLoggerTypeException = InvalidLoggerTypeException;
+
+var NoLoggerFactoryException = /*#__PURE__*/function (_Exception2) {
+  _inherits(NoLoggerFactoryException, _Exception2);
+
+  var _super2 = _createSuper(NoLoggerFactoryException);
+
+  function NoLoggerFactoryException() {
+    _classCallCheck(this, NoLoggerFactoryException);
+
+    return _super2.apply(this, arguments);
+  }
+
+  return NoLoggerFactoryException;
+}(_locustjsException.Exception);
+
+exports.NoLoggerFactoryException = NoLoggerFactoryException;
+
+var InvalidLoggerException = /*#__PURE__*/function (_Exception3) {
+  _inherits(InvalidLoggerException, _Exception3);
+
+  var _super3 = _createSuper(InvalidLoggerException);
+
+  function InvalidLoggerException() {
+    _classCallCheck(this, InvalidLoggerException);
+
+    return _super3.apply(this, arguments);
+  }
+
+  return InvalidLoggerException;
+}(_locustjsException.Exception);
+
+exports.InvalidLoggerException = InvalidLoggerException;
 
 var Log = function Log(category, data, host, exception) {
   _classCallCheck(this, Log);
@@ -233,15 +279,16 @@ exports.LoggerBase = LoggerBase;
 var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
   _inherits(ChainLogger, _LoggerBase);
 
-  var _super = _createSuper(ChainLogger);
+  var _super4 = _createSuper(ChainLogger);
 
   function ChainLogger(next) {
     var _this;
 
     _classCallCheck(this, ChainLogger);
 
-    _this = _super.call(this);
+    _this = _super4.call(this);
     (0, _locustjsException.throwIfInstantiateAbstract)(ChainLogger, _assertThisInitialized(_this));
+    (0, _locustjsException.throwIfNull)(next, 'next');
     (0, _locustjsException.throwIfNotInstanceOf)('next', LoggerBase, next, true);
     _this.next = next;
     return _this;
@@ -287,12 +334,9 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
       return this._next;
     },
     set: function set(value) {
-      if (!(0, _locustjsBase.isEmpty)(value)) {
-        (0, _locustjsException.throwIfNotInstanceOf)('value', LoggerBase, value);
-        this._next = value;
-      } else {
-        this._next = null;
-      }
+      (0, _locustjsException.throwIfNull)(next, 'value');
+      (0, _locustjsException.throwIfNotInstanceOf)('value', LoggerBase, value);
+      this._next = value;
     }
   }]);
 
@@ -304,14 +348,14 @@ exports.ChainLogger = ChainLogger;
 var ArrayLogger = /*#__PURE__*/function (_ChainLogger) {
   _inherits(ArrayLogger, _ChainLogger);
 
-  var _super2 = _createSuper(ArrayLogger);
+  var _super5 = _createSuper(ArrayLogger);
 
   function ArrayLogger(next) {
     var _this2;
 
     _classCallCheck(this, ArrayLogger);
 
-    _this2 = _super2.call(this, next);
+    _this2 = _super5.call(this, next);
     _this2._logs = [];
     return _this2;
   }
@@ -336,12 +380,12 @@ exports.ArrayLogger = ArrayLogger;
 var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
   _inherits(ConsoleLogger, _ChainLogger2);
 
-  var _super3 = _createSuper(ConsoleLogger);
+  var _super6 = _createSuper(ConsoleLogger);
 
   function ConsoleLogger(next) {
     _classCallCheck(this, ConsoleLogger);
 
-    return _super3.call(this, next);
+    return _super6.call(this, next);
   }
 
   _createClass(ConsoleLogger, [{
@@ -384,14 +428,14 @@ exports.ConsoleLogger = ConsoleLogger;
 var DomLogger = /*#__PURE__*/function (_ChainLogger3) {
   _inherits(DomLogger, _ChainLogger3);
 
-  var _super4 = _createSuper(DomLogger);
+  var _super7 = _createSuper(DomLogger);
 
   function DomLogger(target, next) {
     var _this3;
 
     _classCallCheck(this, DomLogger);
 
-    _this3 = _super4.call(this, next);
+    _this3 = _super7.call(this, next);
     _this3.target = target;
 
     if ((0, _locustjsBase.isString)(_this3.target)) {
@@ -493,12 +537,12 @@ exports.DomLogger = DomLogger;
 var NullLogger = /*#__PURE__*/function (_LoggerBase2) {
   _inherits(NullLogger, _LoggerBase2);
 
-  var _super5 = _createSuper(NullLogger);
+  var _super8 = _createSuper(NullLogger);
 
   function NullLogger() {
     _classCallCheck(this, NullLogger);
 
-    return _super5.apply(this, arguments);
+    return _super8.apply(this, arguments);
   }
 
   _createClass(NullLogger, [{
@@ -517,17 +561,17 @@ exports.NullLogger = NullLogger;
 var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
   _inherits(DynamicLogger, _LoggerBase3);
 
-  var _super6 = _createSuper(DynamicLogger);
+  var _super9 = _createSuper(DynamicLogger);
 
   function DynamicLogger(options) {
     var _this4;
 
     _classCallCheck(this, DynamicLogger);
 
-    _this4 = _super6.call(this);
+    _this4 = _super9.call(this);
     _this4.options = Object.assign({
       DomTarget: '#logs',
-      CustomLogger: null
+      loggerFactory: null
     }, options);
     _this4._type = '';
     _this4._instance = null;
@@ -535,6 +579,37 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
   }
 
   _createClass(DynamicLogger, [{
+    key: "_createLogger",
+    value: function _createLogger(factory, type, fallback) {
+      var result;
+
+      try {
+        if ((0, _locustjsBase.isFunction)(factory)) {
+          result = factory(type);
+        }
+
+        if (result == null) {
+          if ((0, _locustjsBase.isFunction)(fallback)) {
+            result = fallback(type);
+          } else {
+            throw new NoLoggerFactoryException();
+          }
+        }
+
+        if (result == null) {
+          throw new InvalidLoggerTypeException();
+        } else {
+          if (!_instanceof(result, LoggerBase)) {
+            throw new InvalidLoggerException();
+          }
+        }
+      } catch (e) {
+        this.error(new Log('DynamicLogger._createLogger', type, this.options.host, e));
+      }
+
+      return result;
+    }
+  }, {
     key: "_logInternal",
     value: function _logInternal(type, log) {
       if (this._instance) {
@@ -554,49 +629,42 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
       return this._type;
     },
     set: function set(value) {
-      if ((0, _locustjsBase.isString)(value)) {
-        var ok = true;
-        value = value.toLowerCase();
+      var _this5 = this;
 
-        switch (value) {
-          case 'console':
-            this._instance = new ConsoleLogger();
-            break;
+      var logger;
 
-          case 'dom':
-            this._instance = new DomLogger(this.options.DomTarget);
-            break;
+      switch (value) {
+        case 'console':
+          logger = this._createLogger(this.options.loggerFactory, value, function () {
+            return new ConsoleLogger();
+          });
+          break;
 
-          case 'null':
-            this._instance = null;
+        case 'dom':
+          logger = this._createLogger(this.options.loggerFactory, value, function () {
+            return DomLogger(_this5.options.DomTarget);
+          });
+          break;
 
-          case 'array':
-            this._instance = new ArrayLogger();
-            break;
+        case 'null':
+          logger = this._createLogger(this.options.loggerFactory, value, function () {
+            return new NullLogger();
+          });
 
-          case 'custom':
-            if ((0, _locustjsBase.isFunction)(this.options.CustomLogger)) {
-              try {
-                this._instance = this.options.CustomLogger();
+        case 'array':
+          logger = this._createLogger(this.options.loggerFactory, value, function () {
+            return new ArrayLogger();
+          });
+          break;
 
-                if (!_instanceof(this._instance, LoggerBase)) {
-                  this._instance = null;
-                  ok = (_readOnlyError("ok"), false);
-                }
-              } catch {
-                this._instance = null;
-                ok = (_readOnlyError("ok"), false);
-              }
-            } else {
-              ok = (_readOnlyError("ok"), false);
-            }
+        default:
+          logger = this._createLogger(this.options.loggerFactory, value);
+          break;
+      }
 
-          default:
-            ok = (_readOnlyError("ok"), false);
-            throw 'invalid logger type.';
-        }
-
-        this._type = ok ? value : '';
+      if (logger) {
+        this._instance = _instanceof(logger, NullLogger) ? null : logger;
+        this._type = value;
       }
     }
   }]);

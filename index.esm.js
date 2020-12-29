@@ -1,11 +1,15 @@
 import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement } from 'locustjs-base';
 import {
     Exception,
+    throwIfNull,
     throwIfNotInstanceOf,
     throwIfInstantiateAbstract,
     throwNotImplementedException
 } from 'locustjs-exception';
 
+class InvalidLoggerTypeException extends Exception { }
+class NoLoggerFactoryException extends Exception { }
+class InvalidLoggerException extends Exception { }
 class Log {
     constructor(category, data, host, exception) {
         this.category = isString(category) ? category : '';
@@ -122,6 +126,7 @@ class ChainLogger extends LoggerBase {
         super();
 
         throwIfInstantiateAbstract(ChainLogger, this);
+        throwIfNull(next, 'next');
         throwIfNotInstanceOf('next', LoggerBase, next, true);
 
         this.next = next;
@@ -130,13 +135,10 @@ class ChainLogger extends LoggerBase {
         return this._next;
     }
     set next(value) {
-        if (!isEmpty(value)) {
-            throwIfNotInstanceOf('value', LoggerBase, value);
+        throwIfNull(next, 'value');
+        throwIfNotInstanceOf('value', LoggerBase, value);
 
-            this._next = value;
-        } else {
-            this._next = null;
-        }
+        this._next = value;
     }
     canLog(type) {
         return true;
@@ -319,54 +321,70 @@ class DynamicLogger extends LoggerBase {
 
         this.options = Object.assign({
             DomTarget: '#logs',
-            CustomLogger: null
+            loggerFactory: null
         }, options);
         this._type = '';
         this._instance = null;
+    }
+    _createLogger(factory, type, fallback) {
+        let result;
+
+        try {
+            if (isFunction(factory)) {
+                result = factory(type);
+            }
+
+            if (result == null) {
+                if (isFunction(fallback)) {
+                    result = fallback(type);
+                } else {
+                    throw new NoLoggerFactoryException();
+                }
+            }
+
+            if (result == null) {
+                throw new InvalidLoggerTypeException();
+            } else {
+                if (!(result instanceof LoggerBase)) {
+                    throw new InvalidLoggerException();
+                }
+            }
+        } catch (e) {
+            this.error(new Log('DynamicLogger._createLogger', type, this.options.host, e));
+        }
+
+        return result;
     }
     get type() {
         return this._type;
     }
     set type(value) {
-        if (isString(value)) {
-            const ok = true;
+        let logger;
 
-            value = value.toLowerCase();
+        switch (value) {
+            case 'console':
+                logger = this._createLogger(this.options.loggerFactory, value, () => new ConsoleLogger());
 
-            switch (value) {
-                case 'console':
-                    this._instance = new ConsoleLogger();
-                    break;
-                case 'dom':
-                    this._instance = new DomLogger(this.options.DomTarget);
-                    break;
-                case 'null':
-                    this._instance = null;
-                case 'array':
-                    this._instance = new ArrayLogger();
-                    break;
-                case 'custom':
-                    if (isFunction(this.options.CustomLogger)) {
-                        try {
-                            this._instance = this.options.CustomLogger();
+                break;
+            case 'dom':
+                logger = this._createLogger(this.options.loggerFactory, value, () => DomLogger(this.options.DomTarget));
 
-                            if (!(this._instance instanceof LoggerBase)) {
-                                this._instance = null;
-                                ok = false;
-                            }
-                        } catch {
-                            this._instance = null;
-                            ok = false;
-                        }
-                    } else {
-                        ok = false;
-                    }
-                default:
-                    ok = false;
-                    throw 'invalid logger type.'
-            }
+                break;
+            case 'null':
+                logger = this._createLogger(this.options.loggerFactory, value, () => new NullLogger());
+            case 'array':
+                logger = this._createLogger(this.options.loggerFactory, value, () => new ArrayLogger());
 
-            this._type = ok ? value: '';
+                break;
+            default:
+                logger = this._createLogger(this.options.loggerFactory, value);
+                
+                break;
+        }
+
+        if (logger) {
+            this._instance = logger instanceof NullLogger ? null : logger;
+            this._type = value;
         }
     }
     _logInternal(type, log) {
@@ -389,5 +407,8 @@ export {
     ConsoleLogger,
     DomLogger,
     NullLogger,
-    DynamicLogger
+    DynamicLogger,
+    NoLoggerFactoryException,
+    InvalidLoggerTypeException,
+    InvalidLoggerException
 }
