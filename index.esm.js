@@ -11,7 +11,8 @@ class InvalidLoggerTypeException extends Exception { }
 class NoLoggerFactoryException extends Exception { }
 class InvalidLoggerException extends Exception { }
 class Log {
-    constructor(category, data, host, exception) {
+    constructor(type, category, data, host, exception) {
+        this.type = isString(type) ? type : 'info';
         this.category = isString(category) ? category : '';
         this.data = data;
         this.host = isString(host) ? host : '';
@@ -27,19 +28,19 @@ class LoggerBase {
         this.category = '';
         this.host = '';
     }
-    _createLog(...args) {
+    _createLog(type, ...args) {
         let result;
 
         const [arg0, arg1, arg2, arg3] = args;
 
         if (isString(arg0) && args.length == 1) {
-            result = new Log(this.category, arg0);
+            result = new Log(type, this.category, arg0);
         } else if (arg0 instanceof Log) {
             result = arg0;
         } else if (arg0 instanceof Exception) {
-            result = new Log(this.category, null, this.host, arg0);
+            result = new Log(type, this.category, null, this.host, arg0);
         } else if (arg0 instanceof Error) {
-            result = new Log(this.category, null, this.host, new Exception(arg0));
+            result = new Log(type, this.category, null, this.host, new Exception(arg0));
         } else {
             if (isObject(arg0)) {
                 const propCount = Object.keys(arg0);
@@ -70,24 +71,24 @@ class LoggerBase {
                 }
 
                 if (isLog) {
-                    result = new Log(arg0.category, arg0.data, arg0.host, arg0.exception);
+                    result = new Log(type, arg0.category, arg0.data, arg0.host, arg0.exception);
                 } else {
-                    result = new Log(this.category, arg0, arg1, arg2);
+                    result = new Log(type, this.category, arg0, arg1, arg2);
                 }
             } else {
-                result = new Log((arg0 || this.category), arg1, (arg2 || this.host), arg3);
+                result = new Log(type, (arg0 || this.category), arg1, (arg2 || this.host), arg3);
             }
         }
 
         return result;
     }
-    _logInternal(type, log) {
+    _logInternal(log) {
         throwNotImplementedException('_logInternal', this.host);
     }
     _log(type, ...args) {
-        const log = this._createLog(...args);
+        const log = this._createLog(type, ...args);
 
-        this._logInternal(type, log);
+        this._logInternal(log);
     }
     log(...args) {
         this._log('log', ...args);
@@ -146,9 +147,9 @@ class ChainLogger extends LoggerBase {
     _log(type, ...args) {
         try {
             if (this.canLog(type)) {
-                const log = this._createLog(...args);
+                const log = this._createLog(type, ...args);
 
-                this._logInternal(type, log);
+                this._logInternal(log);
             } else {
                 if (this.next) {
                     this.next[type](...args);
@@ -169,7 +170,7 @@ class ArrayLogger extends ChainLogger {
 
         this._logs = [];
     }
-    _logInternal(type, log) {
+    _logInternal(log) {
         this._logs.push(log);
     }
     clear() {
@@ -181,8 +182,8 @@ class ConsoleLogger extends ChainLogger {
     constructor(next) {
         super(next);
     }
-    _logInternal(type, log) {
-        switch (type) {
+    _logInternal(log) {
+        switch (log.type) {
             case 'debug': console.debug(log); break;
             case 'danger': console.error(log); break;
             case 'trace': console.trace(log); break;
@@ -273,7 +274,7 @@ class DomLogger extends ChainLogger {
               </table>`;
         }
     }
-    _logInternal(type, log) {
+    _logInternal(log) {
         const target = this._getTarget();
 
         if (target && isFunction(target.querySelector)) {
@@ -293,7 +294,7 @@ class DomLogger extends ChainLogger {
                 tdDate.innerText = this.formatDate(log.date);
                 tdException.innerHTML = this.formatException(log.exception);
 
-                tr.setAttribute("class", type);
+                tr.setAttribute("class", log.type);
 
                 tr.appendChild(tdCategory);
                 tr.appendChild(tdData);
@@ -311,7 +312,7 @@ class DomLogger extends ChainLogger {
 }
 
 class NullLogger extends LoggerBase {
-    _logInternal(type, log) { }
+    _logInternal(log) { }
     clear() { }
 }
 
@@ -350,7 +351,7 @@ class DynamicLogger extends LoggerBase {
                 }
             }
         } catch (e) {
-            this.error(new Log('DynamicLogger._createLogger', type, this.options.host, e));
+            this.error(new Log('danger', 'DynamicLogger._createLogger', type, this.options.host, e));
         }
 
         return result;
@@ -387,9 +388,9 @@ class DynamicLogger extends LoggerBase {
             this._type = value;
         }
     }
-    _logInternal(type, log) {
+    _logInternal(log) {
         if (this._instance) {
-            this._instance._logInternal(type, log);
+            this._instance._logInternal(log);
         }
     }
     clear() {

@@ -81,9 +81,10 @@ var InvalidLoggerException = /*#__PURE__*/function (_Exception3) {
 
 exports.InvalidLoggerException = InvalidLoggerException;
 
-var Log = function Log(category, data, host, exception) {
+var Log = function Log(type, category, data, host, exception) {
   _classCallCheck(this, Log);
 
+  this.type = (0, _locustjsBase.isString)(type) ? type : 'info';
   this.category = (0, _locustjsBase.isString)(category) ? category : '';
   this.data = data;
   this.host = (0, _locustjsBase.isString)(host) ? host : '';
@@ -104,11 +105,11 @@ var LoggerBase = /*#__PURE__*/function () {
 
   _createClass(LoggerBase, [{
     key: "_createLog",
-    value: function _createLog() {
+    value: function _createLog(type) {
       var result;
 
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
+      for (var _len = arguments.length, args = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
+        args[_key - 1] = arguments[_key];
       }
 
       var arg0 = args[0],
@@ -117,13 +118,13 @@ var LoggerBase = /*#__PURE__*/function () {
           arg3 = args[3];
 
       if ((0, _locustjsBase.isString)(arg0) && args.length == 1) {
-        result = new Log(this.category, arg0);
+        result = new Log(type, this.category, arg0);
       } else if (_instanceof(arg0, Log)) {
         result = arg0;
       } else if (_instanceof(arg0, _locustjsException.Exception)) {
-        result = new Log(this.category, null, this.host, arg0);
+        result = new Log(type, this.category, null, this.host, arg0);
       } else if (_instanceof(arg0, Error)) {
-        result = new Log(this.category, null, this.host, new _locustjsException.Exception(arg0));
+        result = new Log(type, this.category, null, this.host, new _locustjsException.Exception(arg0));
       } else {
         if ((0, _locustjsBase.isObject)(arg0)) {
           var propCount = Object.keys(arg0);
@@ -152,12 +153,12 @@ var LoggerBase = /*#__PURE__*/function () {
           }
 
           if (isLog) {
-            result = new Log(arg0.category, arg0.data, arg0.host, arg0.exception);
+            result = new Log(type, arg0.category, arg0.data, arg0.host, arg0.exception);
           } else {
-            result = new Log(this.category, arg0, arg1, arg2);
+            result = new Log(type, this.category, arg0, arg1, arg2);
           }
         } else {
-          result = new Log(arg0 || this.category, arg1, arg2 || this.host, arg3);
+          result = new Log(type, arg0 || this.category, arg1, arg2 || this.host, arg3);
         }
       }
 
@@ -165,7 +166,7 @@ var LoggerBase = /*#__PURE__*/function () {
     }
   }, {
     key: "_logInternal",
-    value: function _logInternal(type, log) {
+    value: function _logInternal(log) {
       (0, _locustjsException.throwNotImplementedException)('_logInternal', this.host);
     }
   }, {
@@ -175,9 +176,9 @@ var LoggerBase = /*#__PURE__*/function () {
         args[_key2 - 1] = arguments[_key2];
       }
 
-      var log = this._createLog.apply(this, args);
+      var log = this._createLog.apply(this, [type].concat(args));
 
-      this._logInternal(type, log);
+      this._logInternal(log);
     }
   }, {
     key: "log",
@@ -308,9 +309,9 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
 
       try {
         if (this.canLog(type)) {
-          var log = this._createLog.apply(this, args);
+          var log = this._createLog.apply(this, [type].concat(args));
 
-          this._logInternal(type, log);
+          this._logInternal(log);
         } else {
           if (this.next) {
             var _this$next;
@@ -362,7 +363,7 @@ var ArrayLogger = /*#__PURE__*/function (_ChainLogger) {
 
   _createClass(ArrayLogger, [{
     key: "_logInternal",
-    value: function _logInternal(type, log) {
+    value: function _logInternal(log) {
       this._logs.push(log);
     }
   }, {
@@ -390,8 +391,8 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
 
   _createClass(ConsoleLogger, [{
     key: "_logInternal",
-    value: function _logInternal(type, log) {
-      switch (type) {
+    value: function _logInternal(log) {
+      switch (log.type) {
         case 'debug':
           console.debug(log);
           break;
@@ -494,7 +495,7 @@ var DomLogger = /*#__PURE__*/function (_ChainLogger3) {
     }
   }, {
     key: "_logInternal",
-    value: function _logInternal(type, log) {
+    value: function _logInternal(log) {
       var target = this._getTarget();
 
       if (target && (0, _locustjsBase.isFunction)(target.querySelector)) {
@@ -512,7 +513,7 @@ var DomLogger = /*#__PURE__*/function (_ChainLogger3) {
           tdData.innerHTML = this.formatData(log.data);
           tdDate.innerText = this.formatDate(log.date);
           tdException.innerHTML = this.formatException(log.exception);
-          tr.setAttribute("class", type);
+          tr.setAttribute("class", log.type);
           tr.appendChild(tdCategory);
           tr.appendChild(tdData);
           tr.appendChild(tdException);
@@ -547,7 +548,7 @@ var NullLogger = /*#__PURE__*/function (_LoggerBase2) {
 
   _createClass(NullLogger, [{
     key: "_logInternal",
-    value: function _logInternal(type, log) {}
+    value: function _logInternal(log) {}
   }, {
     key: "clear",
     value: function clear() {}
@@ -604,16 +605,16 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
           }
         }
       } catch (e) {
-        this.error(new Log('DynamicLogger._createLogger', type, this.options.host, e));
+        this.error(new Log('danger', 'DynamicLogger._createLogger', type, this.options.host, e));
       }
 
       return result;
     }
   }, {
     key: "_logInternal",
-    value: function _logInternal(type, log) {
+    value: function _logInternal(log) {
       if (this._instance) {
-        this._instance._logInternal(type, log);
+        this._instance._logInternal(log);
       }
     }
   }, {
