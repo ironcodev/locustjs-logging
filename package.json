@@ -1,6 +1,6 @@
 {
   "name": "locustjs-logging",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "This library provides various types of loggers that could be employed in any type of front-end application.",
   "main": "index.cjs.js",
   "module": "index.esm.js",

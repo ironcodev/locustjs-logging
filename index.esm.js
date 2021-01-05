@@ -1,4 +1,4 @@
-import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement } from 'locustjs-base';
+import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement, isNull } from 'locustjs-base';
 import {
     Exception,
     throwIfNull,
@@ -127,7 +127,11 @@ class ChainLogger extends LoggerBase {
         super();
 
         throwIfInstantiateAbstract(ChainLogger, this);
-        throwIfNull(next, 'next');
+        
+        if (isNull(next)) {
+            next = new NullLogger();
+        }
+
         throwIfNotInstanceOf('next', LoggerBase, next, true);
 
         this.next = next;
@@ -351,7 +355,7 @@ class DynamicLogger extends LoggerBase {
                 }
             }
         } catch (e) {
-            this.error(new Log('danger', 'DynamicLogger._createLogger', type, this.options.host, e));
+            this.danger(new Log('danger', 'DynamicLogger._createLogger', type, this.options.host, e));
         }
 
         return result;

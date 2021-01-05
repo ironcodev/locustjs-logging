@@ -289,7 +289,11 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
 
     _this = _super4.call(this);
     (0, _locustjsException.throwIfInstantiateAbstract)(ChainLogger, _assertThisInitialized(_this));
-    (0, _locustjsException.throwIfNull)(next, 'next');
+
+    if ((0, _locustjsBase.isNull)(next)) {
+      next = new NullLogger();
+    }
+
     (0, _locustjsException.throwIfNotInstanceOf)('next', LoggerBase, next, true);
     _this.next = next;
     return _this;
@@ -605,7 +609,7 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
           }
         }
       } catch (e) {
-        this.error(new Log('danger', 'DynamicLogger._createLogger', type, this.options.host, e));
+        this.danger(new Log('danger', 'DynamicLogger._createLogger', type, this.options.host, e));
       }
 
       return result;
