@@ -127,7 +127,7 @@ class ChainLogger extends LoggerBase {
         super();
 
         throwIfInstantiateAbstract(ChainLogger, this);
-        
+
         if (isNull(next)) {
             next = new NullLogger();
         }
@@ -326,10 +326,25 @@ class DynamicLogger extends LoggerBase {
 
         this.options = Object.assign({
             DomTarget: '#logs',
-            loggerFactory: null
+            loggerFactory: null,
+            localStorage: window && window.localStorage,
+            loggerTypeKey: 'logger-type'
         }, options);
-        this._type = '';
+
+        this._type = 'null';
         this._instance = null;
+        this._initLogger();
+    }
+    _initLogger() {
+        if (this.options && this.options.localStorage && isFunction(this.options.localStorage.getItem)) {
+            const loggerType = this.options.localStorage.getItem(this.options.loggerTypeKey);
+
+            if (loggerType) {
+                try {
+                    this.type = loggerType;
+                } catch { }
+            }
+        }
     }
     _createLogger(factory, type, fallback) {
         let result;
@@ -383,13 +398,17 @@ class DynamicLogger extends LoggerBase {
                 break;
             default:
                 logger = this._createLogger(this.options.loggerFactory, value);
-                
+
                 break;
         }
 
         if (logger) {
             this._instance = logger instanceof NullLogger ? null : logger;
             this._type = value;
+        }
+
+        if (this.options && this.options.localStorage && this.options.loggerTypeKey && isFunction(this.options.localStorage.setItem)) {
+            this.options.localStorage.setItem(this.options.loggerTypeKey, value);
         }
     }
     _logInternal(log) {

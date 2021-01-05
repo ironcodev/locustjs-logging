@@ -576,14 +576,32 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
     _this4 = _super9.call(this);
     _this4.options = Object.assign({
       DomTarget: '#logs',
-      loggerFactory: null
+      loggerFactory: null,
+      localStorage: window && window.localStorage,
+      loggerTypeKey: 'logger-type'
     }, options);
-    _this4._type = '';
+    _this4._type = 'null';
     _this4._instance = null;
+
+    _this4._initLogger();
+
     return _this4;
   }
 
   _createClass(DynamicLogger, [{
+    key: "_initLogger",
+    value: function _initLogger() {
+      if (this.options && this.options.localStorage && (0, _locustjsBase.isFunction)(this.options.localStorage.getItem)) {
+        var loggerType = this.options.localStorage.getItem(this.options.loggerTypeKey);
+
+        if (loggerType) {
+          try {
+            this.type = loggerType;
+          } catch {}
+        }
+      }
+    }
+  }, {
     key: "_createLogger",
     value: function _createLogger(factory, type, fallback) {
       var result;
@@ -670,6 +688,10 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
       if (logger) {
         this._instance = _instanceof(logger, NullLogger) ? null : logger;
         this._type = value;
+      }
+
+      if (this.options && this.options.localStorage && this.options.loggerTypeKey && (0, _locustjsBase.isFunction)(this.options.localStorage.setItem)) {
+        this.options.localStorage.setItem(this.options.loggerTypeKey, value);
       }
     }
   }]);
