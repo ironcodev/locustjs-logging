@@ -339,7 +339,10 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
       return this._next;
     },
     set: function set(value) {
-      (0, _locustjsException.throwIfNull)(next, 'value');
+      if ((0, _locustjsBase.isNull)(value)) {
+        value = new NullLogger();
+      }
+
       (0, _locustjsException.throwIfNotInstanceOf)('value', LoggerBase, value);
       this._next = value;
     }

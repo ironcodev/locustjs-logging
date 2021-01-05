@@ -1,7 +1,6 @@
 import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement, isNull } from 'locustjs-base';
 import {
     Exception,
-    throwIfNull,
     throwIfNotInstanceOf,
     throwIfInstantiateAbstract,
     throwNotImplementedException
@@ -140,7 +139,10 @@ class ChainLogger extends LoggerBase {
         return this._next;
     }
     set next(value) {
-        throwIfNull(next, 'value');
+        if (isNull(value)) {
+            value = new NullLogger();
+        }
+
         throwIfNotInstanceOf('value', LoggerBase, value);
 
         this._next = value;
