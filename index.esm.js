@@ -1,4 +1,4 @@
-import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement, isNull, isSomeObject, isNumeric } from 'locustjs-base';
+import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement, isNull, isSomeObject, isNumeric, isArray } from 'locustjs-base';
 import { InMemoryStorage, LocalStorageJson, SessionStorageJson } from 'locustjs-storage';
 import {
     Exception,
@@ -232,7 +232,12 @@ class StorageLogger extends ChainLogger {
         }
     }
     flush() {
-        const oldLogs = this.options.store.getItem(this.options.storeKey);
+        let oldLogs = this.options.store.getItem(this.options.storeKey);
+
+        if (!isArray(oldLogs)) {
+            oldLogs = []
+        }
+        
         const newLogs = [...oldLogs, ...this._logs];
         this.options.store.setItem(this.options.storeKey, newLogs);
         this._logs = [];

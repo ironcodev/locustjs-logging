@@ -492,6 +492,11 @@ var StorageLogger = /*#__PURE__*/function (_ChainLogger3) {
     key: "flush",
     value: function flush() {
       var oldLogs = this.options.store.getItem(this.options.storeKey);
+
+      if (!(0, _locustjsBase.isArray)(oldLogs)) {
+        oldLogs = [];
+      }
+
       var newLogs = [].concat(_toConsumableArray(oldLogs), _toConsumableArray(this._logs));
       this.options.store.setItem(this.options.storeKey, newLogs);
       this._logs = [];
