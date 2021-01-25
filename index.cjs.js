@@ -3,11 +3,25 @@
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.InvalidLoggerException = exports.InvalidLoggerTypeException = exports.NoLoggerFactoryException = exports.DynamicLogger = exports.NullLogger = exports.DomLogger = exports.ConsoleLogger = exports.ArrayLogger = exports.ChainLogger = exports.LoggerBase = exports.Log = void 0;
+exports.InvalidLoggerException = exports.InvalidLoggerTypeException = exports.NoLoggerFactoryException = exports.DynamicLogger = exports.StorageLogger = exports.NullLogger = exports.DomLogger = exports.ConsoleLogger = exports.ArrayLogger = exports.ChainLogger = exports.LoggerBase = exports.Log = void 0;
 
 var _locustjsBase = require("locustjs-base");
 
+var _locustjsStorage = require("locustjs-storage");
+
 var _locustjsException = require("locustjs-exception");
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
@@ -433,26 +447,90 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
 
 exports.ConsoleLogger = ConsoleLogger;
 
-var DomLogger = /*#__PURE__*/function (_ChainLogger3) {
-  _inherits(DomLogger, _ChainLogger3);
+var StorageLogger = /*#__PURE__*/function (_ChainLogger3) {
+  _inherits(StorageLogger, _ChainLogger3);
 
-  var _super7 = _createSuper(DomLogger);
+  var _super7 = _createSuper(StorageLogger);
+
+  function StorageLogger(options, next) {
+    var _this3;
+
+    _classCallCheck(this, StorageLogger);
+
+    _this3 = _super7.call(this, next);
+    _this3.options = Object.assign({}, options);
+
+    if (!(0, _locustjsBase.isSomeString)(_this3.options.storeKey)) {
+      _this3.options.storeKey = 'logs';
+    }
+
+    if (!(0, _locustjsBase.isSomeObject)(_this3.options.store)) {
+      _this3.options.store = new _locustjsStorage.InMemoryStorage();
+    }
+
+    if (!(0, _locustjsBase.isNumeric)(_this3.options.throttleLevel)) {
+      _this3.options.throttleLevel = 5;
+    }
+
+    _this3._logs = [];
+    _this3._new_log_count = 0;
+    return _this3;
+  }
+
+  _createClass(StorageLogger, [{
+    key: "_logInternal",
+    value: function _logInternal(log) {
+      this._logs.push(log);
+
+      this._new_log_count++;
+
+      if (this._new_log_count >= this.options.throttleLevel) {
+        this.flush();
+      }
+    }
+  }, {
+    key: "flush",
+    value: function flush() {
+      var oldLogs = this.options.store.getItem(this.options.storeKey);
+      var newLogs = [].concat(_toConsumableArray(oldLogs), _toConsumableArray(this._logs));
+      this.options.store.setItem(this.options.storeKey, newLogs);
+      this._logs = [];
+      this._new_log_count = 0;
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      this._logs = [];
+      this._new_log_count = 0;
+      this.options.store.clear();
+    }
+  }]);
+
+  return StorageLogger;
+}(ChainLogger);
+
+exports.StorageLogger = StorageLogger;
+
+var DomLogger = /*#__PURE__*/function (_ChainLogger4) {
+  _inherits(DomLogger, _ChainLogger4);
+
+  var _super8 = _createSuper(DomLogger);
 
   function DomLogger(target, next) {
-    var _this3;
+    var _this4;
 
     _classCallCheck(this, DomLogger);
 
-    _this3 = _super7.call(this, next);
-    _this3.target = target;
+    _this4 = _super8.call(this, next);
+    _this4.target = target;
 
-    if ((0, _locustjsBase.isString)(_this3.target)) {
-      _this3.target = _this3.target.trim();
+    if ((0, _locustjsBase.isString)(_this4.target)) {
+      _this4.target = _this4.target.trim();
     }
 
-    _this3._init();
+    _this4._init();
 
-    return _this3;
+    return _this4;
   }
 
   _createClass(DomLogger, [{
@@ -545,12 +623,12 @@ exports.DomLogger = DomLogger;
 var NullLogger = /*#__PURE__*/function (_LoggerBase2) {
   _inherits(NullLogger, _LoggerBase2);
 
-  var _super8 = _createSuper(NullLogger);
+  var _super9 = _createSuper(NullLogger);
 
   function NullLogger() {
     _classCallCheck(this, NullLogger);
 
-    return _super8.apply(this, arguments);
+    return _super9.apply(this, arguments);
   }
 
   _createClass(NullLogger, [{
@@ -569,33 +647,33 @@ exports.NullLogger = NullLogger;
 var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
   _inherits(DynamicLogger, _LoggerBase3);
 
-  var _super9 = _createSuper(DynamicLogger);
+  var _super10 = _createSuper(DynamicLogger);
 
   function DynamicLogger(options) {
-    var _this4;
+    var _this5;
 
     _classCallCheck(this, DynamicLogger);
 
-    _this4 = _super9.call(this);
-    _this4.options = Object.assign({
+    _this5 = _super10.call(this);
+    _this5.options = Object.assign({
       DomTarget: '#logs',
       loggerFactory: null,
       localStorage: window && window.localStorage,
       loggerTypeKey: 'logger-type'
     }, options);
-    _this4._type = 'null';
-    _this4._instance = null;
+    _this5._type = 'null';
+    _this5._instance = null;
 
-    _this4._initLogger();
+    _this5._initLogger();
 
-    return _this4;
+    return _this5;
   }
 
   _createClass(DynamicLogger, [{
     key: "_initLogger",
     value: function _initLogger() {
-      if (this.options && this.options.localStorage && (0, _locustjsBase.isFunction)(this.options.localStorage.getItem)) {
-        var loggerType = this.options.localStorage.getItem(this.options.loggerTypeKey);
+      if (this.options && this.options.store && (0, _locustjsBase.isFunction)(this.options.store.getItem)) {
+        var loggerType = this.options.store.getItem(this.options.loggerTypeKey);
 
         if (loggerType) {
           try {
@@ -655,7 +733,7 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
       return this._type;
     },
     set: function set(value) {
-      var _this5 = this;
+      var _this6 = this;
 
       var logger;
 
@@ -668,7 +746,7 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
 
         case 'dom':
           logger = this._createLogger(this.options.loggerFactory, value, function () {
-            return DomLogger(_this5.options.DomTarget);
+            return DomLogger(_this6.options.DomTarget);
           });
           break;
 
@@ -693,8 +771,8 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
         this._type = value;
       }
 
-      if (this.options && this.options.localStorage && this.options.loggerTypeKey && (0, _locustjsBase.isFunction)(this.options.localStorage.setItem)) {
-        this.options.localStorage.setItem(this.options.loggerTypeKey, value);
+      if (this.options && this.options.store && this.options.loggerTypeKey && (0, _locustjsBase.isFunction)(this.options.store.setItem)) {
+        this.options.store.setItem(this.options.loggerTypeKey, value);
       }
     }
   }]);

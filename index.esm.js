@@ -1,4 +1,5 @@
-import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement, isNull } from 'locustjs-base';
+import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement, isNull, isSomeObject, isNumeric } from 'locustjs-base';
+import { InMemoryStorage } from 'locustjs-storage';
 import {
     Exception,
     throwIfNotInstanceOf,
@@ -202,6 +203,47 @@ class ConsoleLogger extends ChainLogger {
     }
 }
 
+class StorageLogger extends ChainLogger {
+    constructor(options, next) {
+        super(next);
+
+        this.options = Object.assign({ }, options);
+
+        if (!isSomeString(this.options.storeKey)) {
+            this.options.storeKey = 'logs';
+        }
+        if (!isSomeObject(this.options.store)) {
+            this.options.store = new InMemoryStorage();
+        }
+        if (!isNumeric(this.options.throttleLevel)) {
+            this.options.throttleLevel = 5;
+        }
+
+        this._logs = [];
+        this._new_log_count = 0;
+    }
+    _logInternal(log) {
+        this._logs.push(log);
+
+        this._new_log_count++;
+
+        if (this._new_log_count >= this.options.throttleLevel) {
+            this.flush();
+        }
+    }
+    flush() {
+        const oldLogs = this.options.store.getItem(this.options.storeKey);
+        const newLogs = [...oldLogs, ...this._logs];
+        this.options.store.setItem(this.options.storeKey, newLogs);
+        this._logs = [];
+        this._new_log_count = 0;
+    }
+    clear() {
+        this._logs = [];
+        this._new_log_count = 0;
+        this.options.store.clear();
+    }
+}
 class DomLogger extends ChainLogger {
     constructor(target, next) {
         super(next);
@@ -338,8 +380,8 @@ class DynamicLogger extends LoggerBase {
         this._initLogger();
     }
     _initLogger() {
-        if (this.options && this.options.localStorage && isFunction(this.options.localStorage.getItem)) {
-            const loggerType = this.options.localStorage.getItem(this.options.loggerTypeKey);
+        if (this.options && this.options.store && isFunction(this.options.store.getItem)) {
+            const loggerType = this.options.store.getItem(this.options.loggerTypeKey);
 
             if (loggerType) {
                 try {
@@ -409,8 +451,8 @@ class DynamicLogger extends LoggerBase {
             this._type = value;
         }
 
-        if (this.options && this.options.localStorage && this.options.loggerTypeKey && isFunction(this.options.localStorage.setItem)) {
-            this.options.localStorage.setItem(this.options.loggerTypeKey, value);
+        if (this.options && this.options.store && this.options.loggerTypeKey && isFunction(this.options.store.setItem)) {
+            this.options.store.setItem(this.options.loggerTypeKey, value);
         }
     }
     _logInternal(log) {
@@ -433,6 +475,7 @@ export {
     ConsoleLogger,
     DomLogger,
     NullLogger,
+    StorageLogger,
     DynamicLogger,
     NoLoggerFactoryException,
     InvalidLoggerTypeException,
