@@ -1,5 +1,5 @@
 import { isEmpty, isObject, isString, isSomeString, isFunction, isjQueryElement, isNull, isSomeObject, isNumeric } from 'locustjs-base';
-import { InMemoryStorage } from 'locustjs-storage';
+import { InMemoryStorage, LocalStorageJson, SessionStorageJson } from 'locustjs-storage';
 import {
     Exception,
     throwIfNotInstanceOf,
@@ -369,7 +369,9 @@ class DynamicLogger extends LoggerBase {
         super();
 
         this.options = Object.assign({
-            DomTarget: '#logs',
+            domTarget: '#logs',
+            storeKey: 'logs',
+            storeThrottle: 5,
             loggerFactory: null,
             localStorage: window && window.localStorage,
             loggerTypeKey: 'logger-type'
@@ -431,13 +433,33 @@ class DynamicLogger extends LoggerBase {
 
                 break;
             case 'dom':
-                logger = this._createLogger(this.options.loggerFactory, value, () => DomLogger(this.options.DomTarget));
+                logger = this._createLogger(this.options.loggerFactory, value, () => new DomLogger(this.options.domTarget));
 
                 break;
             case 'null':
                 logger = this._createLogger(this.options.loggerFactory, value, () => new NullLogger());
             case 'array':
                 logger = this._createLogger(this.options.loggerFactory, value, () => new ArrayLogger());
+
+                break;
+            case 'localstorage':
+                logger = this._createLogger(this.options.loggerFactory,
+                                            value,
+                                            () => new StorageLogger({
+                                                storeKey: this.options.storeKey,
+                                                store: new LocalStorageJson(),
+                                                throttleLevel: this.options.storeThrottle
+                                            }));
+
+                break;
+            case 'sessionstorage':
+                logger = this._createLogger(this.options.loggerFactory,
+                                            value,
+                                            () => new StorageLogger({
+                                                storeKey: this.options.storeKey,
+                                                store: new SessionStorageJson(),
+                                                throttleLevel: this.options.storeThrottle
+                                            }));
 
                 break;
             default:

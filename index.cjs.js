@@ -656,7 +656,9 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
 
     _this5 = _super10.call(this);
     _this5.options = Object.assign({
-      DomTarget: '#logs',
+      domTarget: '#logs',
+      storeKey: 'logs',
+      storeThrottle: 5,
       loggerFactory: null,
       localStorage: window && window.localStorage,
       loggerTypeKey: 'logger-type'
@@ -746,7 +748,7 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
 
         case 'dom':
           logger = this._createLogger(this.options.loggerFactory, value, function () {
-            return DomLogger(_this6.options.DomTarget);
+            return new DomLogger(_this6.options.domTarget);
           });
           break;
 
@@ -758,6 +760,26 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
         case 'array':
           logger = this._createLogger(this.options.loggerFactory, value, function () {
             return new ArrayLogger();
+          });
+          break;
+
+        case 'localstorage':
+          logger = this._createLogger(this.options.loggerFactory, value, function () {
+            return new StorageLogger({
+              storeKey: _this6.options.storeKey,
+              store: new _locustjsStorage.LocalStorageJson(),
+              throttleLevel: _this6.options.storeThrottle
+            });
+          });
+          break;
+
+        case 'sessionstorage':
+          logger = this._createLogger(this.options.loggerFactory, value, function () {
+            return new StorageLogger({
+              storeKey: _this6.options.storeKey,
+              store: new _locustjsStorage.SessionStorageJson(),
+              throttleLevel: _this6.options.storeThrottle
+            });
           });
           break;
 
