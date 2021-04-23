@@ -31,6 +31,10 @@ class LoggerBase {
     _createLog(type, ...args) {
         let result;
 
+        if (args.length == 0) {
+            return;
+        }
+
         const [arg0, arg1, arg2, arg3] = args;
 
         if (isString(arg0) && args.length == 1) {
@@ -76,7 +80,11 @@ class LoggerBase {
                     result = new Log(type, this.category, arg0, arg1, arg2);
                 }
             } else {
-                result = new Log(type, (arg0 || this.category), arg1, (arg2 || this.host), arg3);
+                if (args.length == 1) {
+                    result = new Log(type, this.category, arg0, this.host);
+                } else {
+                    result = new Log(type, (arg0 || this.category), arg1, (arg2 || this.host), arg3);
+                }
             }
         }
 
@@ -85,10 +93,23 @@ class LoggerBase {
     _logInternal(log) {
         throwNotImplementedException('_logInternal', this.host);
     }
+    /*
+        overloads:
+            log(type, data)
+            log(type, Log)
+            log(type, { category: '...', data: ..., host: '...', exception: ... })
+            log(type, category, data)
+            log(type, exception)
+            log(type, error)
+            log(type, category, data, host)
+            log(type, category, data, host, exception)
+    */
     _log(type, ...args) {
         const log = this._createLog(type, ...args);
 
-        this._logInternal(log);
+        if (log) {
+            this._logInternal(log);
+        }
     }
     log(...args) {
         this._log('log', ...args);
