@@ -399,7 +399,7 @@ class DynamicLogger extends LoggerBase {
             storeKey: 'logs',
             storeThrottle: 5,
             loggerFactory: null,
-            localStorage: window && window.localStorage,
+            localStorage: typeof window != 'undefined' ? window.localStorage: null,
             loggerTypeKey: 'logger-type'
         }, options);
 

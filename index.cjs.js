@@ -1,5 +1,7 @@
 "use strict";
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -17,7 +19,7 @@ function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread n
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
 
-function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
 
 function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
 
@@ -27,11 +29,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _instanceof(left, right) { if (right != null && typeof Symbol !== "undefined" && right[Symbol.hasInstance]) { return !!right[Symbol.hasInstance](left); } else { return left instanceof right; } }
-
-function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
-
-function _classCallCheck(instance, Constructor) { if (!_instanceof(instance, Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); if (superClass) _setPrototypeOf(subClass, superClass); }
 
@@ -43,7 +41,7 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
-function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Date.prototype.toString.call(Reflect.construct(Date, [], function () {})); return true; } catch (e) { return false; } }
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
 
@@ -126,6 +124,10 @@ var LoggerBase = /*#__PURE__*/function () {
         args[_key - 1] = arguments[_key];
       }
 
+      if (args.length == 0) {
+        return;
+      }
+
       var arg0 = args[0],
           arg1 = args[1],
           arg2 = args[2],
@@ -133,11 +135,11 @@ var LoggerBase = /*#__PURE__*/function () {
 
       if ((0, _locustjsBase.isString)(arg0) && args.length == 1) {
         result = new Log(type, this.category, arg0);
-      } else if (_instanceof(arg0, Log)) {
+      } else if (arg0 instanceof Log) {
         result = arg0;
-      } else if (_instanceof(arg0, _locustjsException.Exception)) {
+      } else if (arg0 instanceof _locustjsException.Exception) {
         result = new Log(type, this.category, null, this.host, arg0);
-      } else if (_instanceof(arg0, Error)) {
+      } else if (arg0 instanceof Error) {
         result = new Log(type, this.category, null, this.host, new _locustjsException.Exception(arg0));
       } else {
         if ((0, _locustjsBase.isObject)(arg0)) {
@@ -172,7 +174,11 @@ var LoggerBase = /*#__PURE__*/function () {
             result = new Log(type, this.category, arg0, arg1, arg2);
           }
         } else {
-          result = new Log(type, arg0 || this.category, arg1, arg2 || this.host, arg3);
+          if (args.length == 1) {
+            result = new Log(type, this.category, arg0, this.host);
+          } else {
+            result = new Log(type, arg0 || this.category, arg1, arg2 || this.host, arg3);
+          }
         }
       }
 
@@ -183,6 +189,18 @@ var LoggerBase = /*#__PURE__*/function () {
     value: function _logInternal(log) {
       (0, _locustjsException.throwNotImplementedException)('_logInternal', this.host);
     }
+    /*
+        overloads:
+            log(type, data)
+            log(type, Log)
+            log(type, { category: '...', data: ..., host: '...', exception: ... })
+            log(type, category, data)
+            log(type, exception)
+            log(type, error)
+            log(type, category, data, host)
+            log(type, category, data, host, exception)
+    */
+
   }, {
     key: "_log",
     value: function _log(type) {
@@ -192,7 +210,9 @@ var LoggerBase = /*#__PURE__*/function () {
 
       var log = this._createLog.apply(this, [type].concat(args));
 
-      this._logInternal(log);
+      if (log) {
+        this._logInternal(log);
+      }
     }
   }, {
     key: "log",
@@ -314,6 +334,19 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
   }
 
   _createClass(ChainLogger, [{
+    key: "next",
+    get: function get() {
+      return this._next;
+    },
+    set: function set(value) {
+      if ((0, _locustjsBase.isNull)(value)) {
+        value = new NullLogger();
+      }
+
+      (0, _locustjsException.throwIfNotInstanceOf)('value', LoggerBase, value);
+      this._next = value;
+    }
+  }, {
     key: "canLog",
     value: function canLog(type) {
       return true;
@@ -346,19 +379,6 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
           (_this$next2 = this.next)[type].apply(_this$next2, args);
         }
       }
-    }
-  }, {
-    key: "next",
-    get: function get() {
-      return this._next;
-    },
-    set: function set(value) {
-      if ((0, _locustjsBase.isNull)(value)) {
-        value = new NullLogger();
-      }
-
-      (0, _locustjsException.throwIfNotInstanceOf)('value', LoggerBase, value);
-      this._next = value;
     }
   }]);
 
@@ -665,7 +685,7 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
       storeKey: 'logs',
       storeThrottle: 5,
       loggerFactory: null,
-      localStorage: window && window.localStorage,
+      localStorage: typeof window != 'undefined' ? window.localStorage : null,
       loggerTypeKey: 'logger-type'
     }, options);
     _this5._type = 'null';
@@ -685,7 +705,7 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
         if (loggerType) {
           try {
             this.type = loggerType;
-          } catch {}
+          } catch (_unused) {}
         }
       }
     }
@@ -710,7 +730,7 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
         if (result == null) {
           throw new InvalidLoggerTypeException();
         } else {
-          if (!_instanceof(result, LoggerBase)) {
+          if (!(result instanceof LoggerBase)) {
             throw new InvalidLoggerException();
           }
         }
@@ -719,20 +739,6 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
       }
 
       return result;
-    }
-  }, {
-    key: "_logInternal",
-    value: function _logInternal(log) {
-      if (this._instance) {
-        this._instance._logInternal(log);
-      }
-    }
-  }, {
-    key: "clear",
-    value: function clear() {
-      if (this._instance) {
-        this._instance.clear();
-      }
     }
   }, {
     key: "type",
@@ -794,12 +800,26 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
       }
 
       if (logger) {
-        this._instance = _instanceof(logger, NullLogger) ? null : logger;
+        this._instance = logger instanceof NullLogger ? null : logger;
         this._type = value;
       }
 
       if (this.options && this.options.store && this.options.loggerTypeKey && (0, _locustjsBase.isFunction)(this.options.store.setItem)) {
         this.options.store.setItem(this.options.loggerTypeKey, value);
+      }
+    }
+  }, {
+    key: "_logInternal",
+    value: function _logInternal(log) {
+      if (this._instance) {
+        this._instance._logInternal(log);
+      }
+    }
+  }, {
+    key: "clear",
+    value: function clear() {
+      if (this._instance) {
+        this._instance.clear();
       }
     }
   }]);
