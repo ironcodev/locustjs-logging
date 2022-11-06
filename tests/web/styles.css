@@ -1,0 +1,167 @@
+body, td, th, input {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 14px;
+    ;
+}
+
+label {
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.container {
+    margin: 30px 100px;
+}
+
+.btn-clear, .btn-log {
+    margin: 10px 0px;
+    width: 80px;
+}
+
+.btn-clear {
+    margin-left: 50px;
+    font-weight: bold;
+}
+
+/* =============== DOMLogger styles =============== */
+#dom-logger table {
+    border: 1px solid black;
+    width: 100%;
+    cursor: default;
+}
+
+#dom-logger table td {
+    padding: 3px;
+}
+
+/*------ Header ------ */
+#dom-logger table thead tr th:nth-child(1) {
+    /* Row */
+    width: 40px
+}
+
+#dom-logger table thead tr th:nth-child(2) {
+    /* type */
+    width: 60px
+}
+
+#dom-logger table thead tr th:nth-child(3) {
+    /* date */
+    width: 160px
+}
+
+#dom-logger table thead tr th:nth-child(4) {
+    /* host/scope */
+    width: 200px
+}
+
+/*------ Zebra Stripping ------ */
+#dom-logger table tbody tr:nth-child(even) {
+    background-color: gray;
+}
+
+/*------ Columns ------ */
+#dom-logger table tbody tr td:nth-child(1) {
+    text-align: center;
+}
+
+#dom-logger table tbody tr td:nth-child(2) {
+    text-transform: uppercase;
+}
+
+/*------ Rows ------ */
+#dom-logger table thead tr {
+    background-color: #5c5ce2;
+    color: white;
+}
+
+#dom-logger table tbody tr.log {
+    background-color: white;
+}
+
+#dom-logger table tbody tr.info {
+    background-color: #bcccff;
+}
+
+#dom-logger table tbody tr.debug {
+    background-color: #edd6ff;
+}
+
+#dom-logger table tbody tr.success {
+    background-color: #98ff98;
+}
+
+#dom-logger table tbody tr.danger {
+    background-color: red;
+    color: white;
+}
+
+#dom-logger table tbody tr.fail {
+    background-color: darkred;
+    color: white;
+}
+
+#dom-logger table tbody tr.warn {
+    background-color: #ffc0ff;
+    color: black;
+}
+
+#dom-logger table tbody tr.abort {
+    background-color: #908e8e;
+    color: white;
+}
+
+#dom-logger table tbody tr.cancel {
+    background-color: #ffd27f;
+}
+
+#dom-logger table tbody tr.suggest {
+    background-color: purple;
+    color: white;
+}
+
+#dom-logger table tbody tr.trace {
+    background-color: #c6ffff;
+    color: black;
+}
+
+/*------ Rows:hover ------ */
+#dom-logger table tbody tr.log:hover,
+#dom-logger table tbody tr.info:hover,
+#dom-logger table tbody tr.debug:hover,
+#dom-logger table tbody tr.success:hover,
+#dom-logger table tbody tr.suggest:hover,
+#dom-logger table tbody tr.warn:hover,
+#dom-logger table tbody tr.danger:hover,
+#dom-logger table tbody tr.fail:hover,
+#dom-logger table tbody tr.abort:hover,
+#dom-logger table tbody tr.trace:hover,
+#dom-logger table tbody tr.cancel:hover {
+    background-color: #ffff96;
+    color: black;
+}
+
+/*------ Log props ------ */
+#dom-logger table tbody .scope {
+    padding: 1px 6px;
+    margin: 2px;
+    border: 1px solid black;
+    color: white;
+    background-color: #002e7f;
+}
+
+#dom-logger table tbody .host {
+    padding: 1px 6px;
+    margin: 2px;
+    border: 1px solid black;
+    color: black;
+    background-color: #ffc826;
+}
+
+#dom-logger table tbody .data {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    height: 30px;
+    max-height: 30px;
+}

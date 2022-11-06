@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Test LocustJs ConsoleLogger</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <div class="container">
+      <form>
+        <div>
+          <label for="log-type">Log Type</label>
+          <span>
+            <input type="radio" name="log-type" value="console" />
+            Console
+          </span>
+          <span>
+            <input type="radio" name="log-type" value="dom" />
+            DOM
+          </span>
+          <span>
+            <input type="radio" name="log-type" value="array" />
+            Array
+          </span>
+          <span>
+            <input type="radio" name="log-type" value="null" />
+            Null
+          </span>
+          <span>
+            <input type="radio" name="log-type" value="localstorage" />
+            Local Storage
+          </span>
+          <span>
+            <input type="radio" name="log-type" value="sessionstorage" />
+            Session Storage
+          </span>
+        </div>
+        <div>
+          <button type="button" class="btn-log">Log</button>
+          <button type="button" class="btn-log">Info</button>
+          <button type="button" class="btn-log">Debug</button>
+          <button type="button" class="btn-log">Success</button>
+          <button type="button" class="btn-log">Danger</button>
+          <button type="button" class="btn-log">Fail</button>
+          <button type="button" class="btn-log">Suggest</button>
+          <button type="button" class="btn-log">Warn</button>
+          <button type="button" class="btn-log">Abort</button>
+          <button type="button" class="btn-log">Cancel</button>
+          <button type="button" class="btn-log">Trace</button>
+          <button type="button" class="btn-clear">Clear</button>
+        </div>
+      </form>
+    </div>
+    
+    <div id="dom-logger"></div>
+    
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
