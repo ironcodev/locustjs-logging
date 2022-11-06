@@ -1094,7 +1094,7 @@ export {
   ChainLogger,
   ArrayLogger,
   ConsoleLogger,
-  DOMLogger as DomLogger,
+  DOMLogger,
   NullLogger,
   StorageLogger,
   LocalStorageLogger,

@@ -4,7 +4,7 @@ function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" =
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-exports.StorageLogger = exports.SessionStorageLogger = exports.NullLogger = exports.NoLoggerFactoryException = exports.LoggerBase = exports.LogType = exports.Log = exports.LocalStorageLogger = exports.InvalidLoggerTypeException = exports.InvalidLoggerException = exports.DynamicLogger = exports.DomLogger = exports.ConsoleLogger = exports.ConsoleColors = exports.ChainLogger = exports.ArrayLogger = void 0;
+exports.StorageLogger = exports.SessionStorageLogger = exports.NullLogger = exports.NoLoggerFactoryException = exports.LoggerBase = exports.LogType = exports.Log = exports.LocalStorageLogger = exports.InvalidLoggerTypeException = exports.InvalidLoggerException = exports.DynamicLogger = exports.DOMLogger = exports.ConsoleLogger = exports.ConsoleColors = exports.ChainLogger = exports.ArrayLogger = void 0;
 exports.colorize = colorize;
 exports.formatDate = formatDate;
 exports.merge = merge;
@@ -917,7 +917,7 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
   }]);
   return DOMLogger;
 }(ChainLogger);
-exports.DomLogger = DOMLogger;
+exports.DOMLogger = DOMLogger;
 var NullLogger = /*#__PURE__*/function (_LoggerBase2) {
   _inherits(NullLogger, _LoggerBase2);
   var _super11 = _createSuper(NullLogger);
