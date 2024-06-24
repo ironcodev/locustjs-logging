@@ -402,7 +402,7 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
       return filter.findIndex(function (x) {
         var type = (0, _base.isNumber)(x) ? LogType.getString(x) : (x || "").toString().trim().toLowerCase();
         return type == "*" || type == "all" || type == log.type;
-      }) >= 0 && ((0, _locustjsBase.isEmpty)(this.options.scopeFilter) || this.options.scopeFilter == log.scope);
+      }) >= 0 && ((0, _base.isEmpty)(this.options.scopeFilter) || this.options.scopeFilter == log.scope);
     }
   }, {
     key: "__logInternal",
