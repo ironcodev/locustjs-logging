@@ -10,21 +10,21 @@ import {
   isAnObject,
   isSomeArray,
   isNumber,
-} from "locustjs-base";
+} from "@locustjs/base";
 import {
   LocalStorageJson,
   SessionStorageJson,
   StorageBase,
-} from "locustjs-storage";
+} from "@locustjs/storage";
 import {
   Exception,
   throwIfNotInstanceOf,
   throwIfInstantiateAbstract,
   throwNotImplementedException,
   throwNotSupportedException,
-} from "locustjs-exception";
-import Enum from "locustjs-enum";
-import { htmlEncode } from "htmlencode";
+} from "@locustjs/exception";
+import Enum from "@locustjs/enum";
+import { htmlEncode } from "@locustjs/htmlencode";
 
 const LogType = Enum.define(
   {

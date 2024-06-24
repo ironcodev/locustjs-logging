@@ -8,11 +8,11 @@ exports.StorageLogger = exports.SessionStorageLogger = exports.NullLogger = expo
 exports.colorize = colorize;
 exports.formatDate = formatDate;
 exports.merge = merge;
-var _locustjsBase = require("locustjs-base");
-var _locustjsStorage = require("locustjs-storage");
-var _locustjsException = require("locustjs-exception");
-var _locustjsEnum = _interopRequireDefault(require("locustjs-enum"));
-var _htmlencode = require("htmlencode");
+var _base = require("@locustjs/base");
+var _storage = require("@locustjs/storage");
+var _exception = require("@locustjs/exception");
+var _enum = _interopRequireDefault(require("@locustjs/enum"));
+var _htmlencode = require("@locustjs/htmlencode");
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
@@ -36,7 +36,7 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-var LogType = _locustjsEnum["default"].define({
+var LogType = _enum["default"].define({
   info: 0,
   log: 1,
   debug: 2,
@@ -106,7 +106,7 @@ var InvalidLoggerTypeException = /*#__PURE__*/function (_Exception) {
     return _super.apply(this, arguments);
   }
   return _createClass(InvalidLoggerTypeException);
-}(_locustjsException.Exception);
+}(_exception.Exception);
 exports.InvalidLoggerTypeException = InvalidLoggerTypeException;
 var NoLoggerFactoryException = /*#__PURE__*/function (_Exception2) {
   _inherits(NoLoggerFactoryException, _Exception2);
@@ -116,7 +116,7 @@ var NoLoggerFactoryException = /*#__PURE__*/function (_Exception2) {
     return _super2.apply(this, arguments);
   }
   return _createClass(NoLoggerFactoryException);
-}(_locustjsException.Exception);
+}(_exception.Exception);
 exports.NoLoggerFactoryException = NoLoggerFactoryException;
 var InvalidLoggerException = /*#__PURE__*/function (_Exception3) {
   _inherits(InvalidLoggerException, _Exception3);
@@ -126,19 +126,19 @@ var InvalidLoggerException = /*#__PURE__*/function (_Exception3) {
     return _super3.apply(this, arguments);
   }
   return _createClass(InvalidLoggerException);
-}(_locustjsException.Exception);
+}(_exception.Exception);
 exports.InvalidLoggerException = InvalidLoggerException;
 var Log = /*#__PURE__*/_createClass(function Log(type, host, scope, exception) {
   _classCallCheck(this, Log);
   this.date = new Date();
   this.type = LogType.getString(type, LogType.log);
-  this.scope = (0, _locustjsBase.isString)(scope) ? scope : undefined;
+  this.scope = (0, _base.isString)(scope) ? scope : undefined;
   for (var _len = arguments.length, data = new Array(_len > 4 ? _len - 4 : 0), _key = 4; _key < _len; _key++) {
     data[_key - 4] = arguments[_key];
   }
   this.data = data.length > 1 ? data : data.length > 0 ? data[0] : undefined;
-  this.host = (0, _locustjsBase.isString)(host) ? host : undefined;
-  this.exception = (0, _locustjsBase.isEmpty)(exception) ? undefined : new _locustjsException.Exception(exception);
+  this.host = (0, _base.isString)(host) ? host : undefined;
+  this.exception = (0, _base.isEmpty)(exception) ? undefined : new _exception.Exception(exception);
   this.batch = data.length > 1;
 });
 exports.Log = Log;
@@ -183,7 +183,7 @@ options: {
 var LoggerBase = /*#__PURE__*/function () {
   function LoggerBase(options) {
     _classCallCheck(this, LoggerBase);
-    (0, _locustjsException.throwIfInstantiateAbstract)(LoggerBase, this);
+    (0, _exception.throwIfInstantiateAbstract)(LoggerBase, this);
     this.options = Object.assign({}, options);
     this._scopes = [];
     this.scope = '';
@@ -197,7 +197,7 @@ var LoggerBase = /*#__PURE__*/function () {
     key: "enterScope",
     value: function enterScope(value) {
       this._scopes.push(this.scope);
-      this.scope = (0, _locustjsBase.isFunction)(value) ? value.name : (0, _locustjsBase.isString)(value) ? value : '';
+      this.scope = (0, _base.isFunction)(value) ? value.name : (0, _base.isString)(value) ? value : '';
     }
   }, {
     key: "exitScope",
@@ -226,7 +226,7 @@ var LoggerBase = /*#__PURE__*/function () {
         data[_key2 - 1] = arguments[_key2];
       }
       var arg0 = data.length > 0 ? data[0] : undefined;
-      if ((0, _locustjsBase.isAnObject)(arg0) && (arg0 instanceof _locustjsException.Exception || arg0 instanceof Error)) {
+      if ((0, _base.isAnObject)(arg0) && (arg0 instanceof _exception.Exception || arg0 instanceof Error)) {
         result = _construct(Log, [type, this.options.host, this.scope, arg0].concat(_toConsumableArray(data.slice(1))));
       } else {
         result = _construct(Log, [type, this.options.host, this.scope, undefined].concat(data));
@@ -236,17 +236,17 @@ var LoggerBase = /*#__PURE__*/function () {
   }, {
     key: "_logInternal",
     value: function _logInternal(log) {
-      (0, _locustjsException.throwNotImplementedException)("_logInternal", this.host);
+      (0, _exception.throwNotImplementedException)("_logInternal", this.host);
     }
   }, {
     key: "clear",
     value: function clear() {
-      (0, _locustjsException.throwNotImplementedException)("clear", this.host);
+      (0, _exception.throwNotImplementedException)("clear", this.host);
     }
   }, {
     key: "getAll",
     value: function getAll() {
-      (0, _locustjsException.throwNotImplementedException)("getAll", this.host);
+      (0, _exception.throwNotImplementedException)("getAll", this.host);
     }
     /*
     // *********** UNDER DEVELOPMENT ***************
@@ -380,11 +380,11 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
     var _this;
     _classCallCheck(this, ChainLogger);
     _this = _super4.call(this, options);
-    (0, _locustjsException.throwIfInstantiateAbstract)(ChainLogger, _assertThisInitialized(_this));
-    if ((0, _locustjsBase.isNull)(_this.options.next)) {
+    (0, _exception.throwIfInstantiateAbstract)(ChainLogger, _assertThisInitialized(_this));
+    if ((0, _base.isNull)(_this.options.next)) {
       _this.options.next = new NullLogger();
     }
-    (0, _locustjsException.throwIfNotInstanceOf)("options.next", LoggerBase, _this.options.next, _this.host);
+    (0, _exception.throwIfNotInstanceOf)("options.next", LoggerBase, _this.options.next, _this.host);
     _this.options.filter = "*";
     _this.options.unattended = false;
     return _this;
@@ -397,16 +397,16 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
   }, {
     key: "canLog",
     value: function canLog(log) {
-      var filter = (0, _locustjsBase.isSomeArray)(this.options.filter) ? this.options.filter : (0, _locustjsBase.isSomeString)(this.options.filter) ? this.options.filter.split(",") : ["*"];
+      var filter = (0, _base.isSomeArray)(this.options.filter) ? this.options.filter : (0, _base.isSomeString)(this.options.filter) ? this.options.filter.split(",") : ["*"];
       return filter.findIndex(function (x) {
-        var type = (0, _locustjsBase.isNumber)(x) ? LogType.getString(x) : (x || "").toString().trim().toLowerCase();
+        var type = (0, _base.isNumber)(x) ? LogType.getString(x) : (x || "").toString().trim().toLowerCase();
         return type == "*" || type == "all" || type == log.type;
       }) >= 0;
     }
   }, {
     key: "__logInternal",
     value: function __logInternal(log) {
-      (0, _locustjsException.throwNotImplementedException)("__logInternal", this.host);
+      (0, _exception.throwNotImplementedException)("__logInternal", this.host);
     }
   }, {
     key: "_logInternal",
@@ -495,7 +495,7 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
     var _this3;
     _classCallCheck(this, ConsoleLogger);
     _this3 = _super6.call(this, options);
-    if (!(0, _locustjsBase.isObject)(_this3.options.styles)) {
+    if (!(0, _base.isObject)(_this3.options.styles)) {
       _this3.options.styles = {};
     }
     if (_this3.options.env == "node") {
@@ -578,19 +578,19 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
   }, {
     key: "_initStyle",
     value: function _initStyle(type, label, date, scope, host) {
-      if (!(0, _locustjsBase.isObject)(this.options.styles[type])) {
+      if (!(0, _base.isObject)(this.options.styles[type])) {
         this.options.styles[type] = {};
       }
-      if (!(0, _locustjsBase.isObject)(this.options.styles[type].label)) {
+      if (!(0, _base.isObject)(this.options.styles[type].label)) {
         this.options.styles[type].label = {};
       }
-      if (!(0, _locustjsBase.isObject)(this.options.styles[type].date)) {
+      if (!(0, _base.isObject)(this.options.styles[type].date)) {
         this.options.styles[type].date = {};
       }
-      if (!(0, _locustjsBase.isObject)(this.options.styles[type].scope)) {
+      if (!(0, _base.isObject)(this.options.styles[type].scope)) {
         this.options.styles[type].scope = {};
       }
-      if (!(0, _locustjsBase.isObject)(this.options.styles[type].host)) {
+      if (!(0, _base.isObject)(this.options.styles[type].host)) {
         this.options.styles[type].host = {};
       }
       this._assignStyle(this.options.styles[type].label, label);
@@ -602,7 +602,7 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
     key: "_assignStyle",
     value: function _assignStyle(obj, style) {
       Object.keys(style).forEach(function (key) {
-        if (!(0, _locustjsBase.isString)(obj[key])) {
+        if (!(0, _base.isString)(obj[key])) {
           obj[key] = style[key];
         }
       });
@@ -622,10 +622,10 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
       var _console;
       var style = this.options.styles[log.type] || {};
       var prefix = "".concat(colorize(formatDate(log.date, this.options.dateType), style.date), " ").concat(colorize(" ".concat(log.type.toUpperCase(), " "), style.label));
-      if ((0, _locustjsBase.isSomeString)(log.host)) {
+      if ((0, _base.isSomeString)(log.host)) {
         prefix += " ".concat(colorize(" ".concat(log.host, " "), style.host), " ");
       }
-      if ((0, _locustjsBase.isSomeString)(log.scope)) {
+      if ((0, _base.isSomeString)(log.scope)) {
         prefix += " ".concat(colorize(log.scope, style.scope), " ");
       }
       var args = [prefix];
@@ -668,11 +668,11 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
       var prefix = "%c".concat(formatDate(log.date, this.options.dateType), " %c ").concat(log.type.toUpperCase(), " ");
       var style = this.options.styles[log.type] || {};
       var colors = [merge(style.date, ":", ";"), merge(style.label, ":", ";")];
-      if ((0, _locustjsBase.isSomeString)(log.host)) {
+      if ((0, _base.isSomeString)(log.host)) {
         prefix += "%c ".concat(log.host, " ");
         colors.push(merge(style.host, ":", ";"));
       }
-      if ((0, _locustjsBase.isSomeString)(log.scope)) {
+      if ((0, _base.isSomeString)(log.scope)) {
         prefix += "%c ".concat(log.scope, " ");
         colors.push(merge(style.scope, ":", ";"));
       }
@@ -712,7 +712,7 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
   }, {
     key: "getAll",
     value: function getAll() {
-      (0, _locustjsException.throwNotSupportedException)("getAll", this.host);
+      (0, _exception.throwNotSupportedException)("getAll", this.host);
     }
   }, {
     key: "clear",
@@ -737,14 +737,14 @@ var StorageLogger = /*#__PURE__*/function (_ArrayLogger) {
     var _this4;
     _classCallCheck(this, StorageLogger);
     _this4 = _super7.call(this, options);
-    (0, _locustjsException.throwIfInstantiateAbstract)(StorageLogger, _assertThisInitialized(_this4));
-    if (!(0, _locustjsBase.isSomeString)(_this4.options.storeKey)) {
+    (0, _exception.throwIfInstantiateAbstract)(StorageLogger, _assertThisInitialized(_this4));
+    if (!(0, _base.isSomeString)(_this4.options.storeKey)) {
       _this4.options.storeKey = "logs";
     }
-    if ((0, _locustjsBase.isEmpty)(_this4.options.store)) {
-      (0, _locustjsException.throwIfNotInstanceOf)("options.store", _locustjsStorage.StorageBase, _this4.options.store, _this4.host);
+    if ((0, _base.isEmpty)(_this4.options.store)) {
+      (0, _exception.throwIfNotInstanceOf)("options.store", _storage.StorageBase, _this4.options.store, _this4.host);
     }
-    if (!(0, _locustjsBase.isNumeric)(_this4.options.bufferSize)) {
+    if (!(0, _base.isNumeric)(_this4.options.bufferSize)) {
       _this4.options.bufferSize = 5;
     }
     _this4._new_log_count = 0;
@@ -781,7 +781,7 @@ var LocalStorageLogger = /*#__PURE__*/function (_StorageLogger) {
   function LocalStorageLogger(options) {
     _classCallCheck(this, LocalStorageLogger);
     return _super8.call(this, Object.assign(options, {
-      store: new _locustjsStorage.LocalStorageJson()
+      store: new _storage.LocalStorageJson()
     }));
   }
   return _createClass(LocalStorageLogger);
@@ -793,7 +793,7 @@ var SessionStorageLogger = /*#__PURE__*/function (_StorageLogger2) {
   function SessionStorageLogger(options) {
     _classCallCheck(this, SessionStorageLogger);
     return _super9.call(this, Object.assign(options, {
-      store: new _locustjsStorage.SessionStorageJson()
+      store: new _storage.SessionStorageJson()
     }));
   }
   return _createClass(SessionStorageLogger);
@@ -826,12 +826,12 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
       return this._target;
     },
     set: function set(value) {
-      if ((0, _locustjsBase.isjQueryElement)(value)) {
+      if ((0, _base.isjQueryElement)(value)) {
         this._target = value.length ? value[0] : null;
-      } else if ((0, _locustjsBase.isString)(value)) {
+      } else if ((0, _base.isString)(value)) {
         this._target = document.querySelector(value);
       } else {
-        this._target = (0, _locustjsBase.isObject)(value) && (0, _locustjsBase.isFunction)(value.querySelector) ? value : null;
+        this._target = (0, _base.isObject)(value) && (0, _base.isFunction)(value.querySelector) ? value : null;
       }
     }
   }, {
@@ -841,18 +841,18 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
       var recreate = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       this._count = 0;
       if (this.target && (this.target.querySelectorAll('tbody tr').length == 0 || recreate)) {
-        if ((0, _locustjsBase.isFunction)(this.options.onInit)) {
+        if ((0, _base.isFunction)(this.options.onInit)) {
           var result = this.options.onInit(this);
-          if ((0, _locustjsBase.isSomeString)(result)) {
+          if ((0, _base.isSomeString)(result)) {
             this.target.innerHTML = result;
-          } else if ((0, _locustjsBase.isObject)(result) && (0, _locustjsBase.isFunction)(result.querySelector)) {
+          } else if ((0, _base.isObject)(result) && (0, _base.isFunction)(result.querySelector)) {
             this.target.appendChild(result);
           }
         } else {
           var _className = this.options.className || "dom-logger";
           this.target.innerHTML = "\n          <table class=\"".concat(_className, "\">\n              <thead>\n                  <tr>\n                    <th>Row</th>\n                    <th>Type</th>\n                    <th>Date</th>\n                    <th>Scope/Host</th>\n                    <th>Data/Exception</th>\n                  </tr>\n              </thead>\n              <tbody>\n              </tbody>\n          </table>");
         }
-        if ((0, _locustjsBase.isFunction)(this.options.onRowClick)) {
+        if ((0, _base.isFunction)(this.options.onRowClick)) {
           document.querySelectorAll("".concat(className, " table tbody tr")).forEach(function (tr) {
             tr.onclick = _this6.options.onRowClick;
           });
@@ -864,7 +864,7 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
     value: function __logInternal(log) {
       if (this.target) {
         var tr;
-        if ((0, _locustjsBase.isFunction)(this.options.onNewLog)) {
+        if ((0, _base.isFunction)(this.options.onNewLog)) {
           tr = this.options.onNewLog(this, log, this._count);
         } else {
           var body = this.target.querySelector("tbody");
@@ -883,7 +883,7 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
             var data;
             var exception;
             try {
-              if ((0, _locustjsBase.isFunction)(this.options.format)) {
+              if ((0, _base.isFunction)(this.options.format)) {
                 data = this.options.format(this, log, 'data');
                 exception = this.options.format(this, log, 'exception');
               } else {
@@ -902,7 +902,7 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
             tr.appendChild(tdScopeHost);
             tr.appendChild(tdDataException);
           }
-          if ((0, _locustjsBase.isObject)(tr) && (0, _locustjsBase.isFunction)(tr.querySelector)) {
+          if ((0, _base.isObject)(tr) && (0, _base.isFunction)(tr.querySelector)) {
             body.appendChild(tr);
           }
         }
@@ -985,11 +985,11 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
     value: function _createLogger(factory, type, fallback) {
       var result;
       try {
-        if ((0, _locustjsBase.isFunction)(factory)) {
+        if ((0, _base.isFunction)(factory)) {
           result = factory(this, type);
         }
         if (result == null) {
-          if ((0, _locustjsBase.isFunction)(fallback)) {
+          if ((0, _base.isFunction)(fallback)) {
             result = fallback();
           } else {
             throw new NoLoggerFactoryException();
@@ -1082,7 +1082,7 @@ var DynamicLogger = /*#__PURE__*/function (_LoggerBase3) {
     key: "_log",
     value: function _log(type) {
       var _type = LogType.getString(type);
-      if ((0, _locustjsBase.isFunction)(this._instance[_type])) {
+      if ((0, _base.isFunction)(this._instance[_type])) {
         var _this$_instance;
         for (var _len16 = arguments.length, args = new Array(_len16 > 1 ? _len16 - 1 : 0), _key16 = 1; _key16 < _len16; _key16++) {
           args[_key16 - 1] = arguments[_key16];
