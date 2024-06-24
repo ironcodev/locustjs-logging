@@ -324,6 +324,7 @@ class ChainLogger extends LoggerBase {
     );
 
     this.options.filter = "*";
+    this.options.scopeFilter = "";
     this.options.unattended = false;
   }
   get next() {
@@ -343,7 +344,7 @@ class ChainLogger extends LoggerBase {
           : (x || "").toString().trim().toLowerCase();
 
         return type == "*" || type == "all" || type == log.type;
-      }) >= 0
+      }) >= 0 && (isEmpty(this.options.scopeFilter) || this.options.scopeFilter == log.scope)
     );
   }
   __logInternal(log) {
@@ -387,6 +388,18 @@ class ChainLogger extends LoggerBase {
       }
     }
   }
+  _clearInternal() { }
+  clear() {
+    this._clearInternal();
+
+    current = this.options.next;
+    
+    while (current) {
+      current.clear();
+
+      current = current.next;
+    }
+  }
 }
 
 class ArrayLogger extends ChainLogger {
@@ -401,7 +414,7 @@ class ArrayLogger extends ChainLogger {
   getAll() {
     return this._logs;
   }
-  clear() {
+  _clearInternal() {
     this._logs = [];
   }
 }
@@ -712,7 +725,7 @@ class ConsoleLogger extends ChainLogger {
   getAll() {
     throwNotSupportedException("getAll", this.host);
   }
-  clear() {
+  _clearInternal() {
     console.clear();
   }
 }
@@ -762,8 +775,8 @@ class StorageLogger extends ArrayLogger {
       this.options.store.setItem(this.options.storeKey, this.getAll());
     }
   }
-  clear() {
-    super.clear();
+  _clearInternal() {
+    super._clearInternal();
 
     this._new_log_count = 0;
     this.options.store.setItem(this.options.storeKey, []);
@@ -917,7 +930,7 @@ class DOMLogger extends ChainLogger {
       this._count++;
     }
   }
-  clear() {
+  _clearInternal() {
     this._init(true);
   }
 }

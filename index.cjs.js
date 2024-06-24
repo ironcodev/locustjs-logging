@@ -386,6 +386,7 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
     }
     (0, _exception.throwIfNotInstanceOf)("options.next", LoggerBase, _this.options.next, _this.host);
     _this.options.filter = "*";
+    _this.options.scopeFilter = "";
     _this.options.unattended = false;
     return _this;
   }
@@ -401,7 +402,7 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
       return filter.findIndex(function (x) {
         var type = (0, _base.isNumber)(x) ? LogType.getString(x) : (x || "").toString().trim().toLowerCase();
         return type == "*" || type == "all" || type == log.type;
-      }) >= 0;
+      }) >= 0 && ((0, _locustjsBase.isEmpty)(this.options.scopeFilter) || this.options.scopeFilter == log.scope);
     }
   }, {
     key: "__logInternal",
@@ -448,6 +449,19 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
         }
       }
     }
+  }, {
+    key: "_clearInternal",
+    value: function _clearInternal() {}
+  }, {
+    key: "clear",
+    value: function clear() {
+      this._clearInternal();
+      current = this.options.next;
+      while (current) {
+        current.clear();
+        current = current.next;
+      }
+    }
   }]);
   return ChainLogger;
 }(LoggerBase);
@@ -473,8 +487,8 @@ var ArrayLogger = /*#__PURE__*/function (_ChainLogger) {
       return this._logs;
     }
   }, {
-    key: "clear",
-    value: function clear() {
+    key: "_clearInternal",
+    value: function _clearInternal() {
       this._logs = [];
     }
   }]);
@@ -715,8 +729,8 @@ var ConsoleLogger = /*#__PURE__*/function (_ChainLogger2) {
       (0, _exception.throwNotSupportedException)("getAll", this.host);
     }
   }, {
-    key: "clear",
-    value: function clear() {
+    key: "_clearInternal",
+    value: function _clearInternal() {
       console.clear();
     }
   }]);
@@ -765,9 +779,9 @@ var StorageLogger = /*#__PURE__*/function (_ArrayLogger) {
       }
     }
   }, {
-    key: "clear",
-    value: function clear() {
-      _get(_getPrototypeOf(StorageLogger.prototype), "clear", this).call(this);
+    key: "_clearInternal",
+    value: function _clearInternal() {
+      _get(_getPrototypeOf(StorageLogger.prototype), "_clearInternal", this).call(this);
       this._new_log_count = 0;
       this.options.store.setItem(this.options.storeKey, []);
     }
@@ -910,8 +924,8 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
       }
     }
   }, {
-    key: "clear",
-    value: function clear() {
+    key: "_clearInternal",
+    value: function _clearInternal() {
       this._init(true);
     }
   }]);
