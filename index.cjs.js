@@ -398,12 +398,13 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
   }, {
     key: "canLog",
     value: function canLog(log) {
-      var _log$scope;
       var filter = (0, _base.isSomeArray)(this.options.filter) ? this.options.filter : (0, _base.isSomeString)(this.options.filter) ? this.options.filter.split(",") : ["*"];
+      var scopeFilter = this.options.scopeFilter.toString().toLowerCase();
+      var logScope = log.scope.toString().toLowerCase();
       return filter.findIndex(function (x) {
         var type = (0, _base.isNumber)(x) ? LogType.getString(x) : (x || "").toString().trim().toLowerCase();
         return type == "*" || type == "all" || type == log.type;
-      }) >= 0 && ((0, _base.isEmpty)(this.options.scopeFilter) || this.options.scopeFilter.toLowerCase().includes(((_log$scope = log.scope) === null || _log$scope === void 0 ? void 0 : _log$scope.toLowerCase()) || ""));
+      }) >= 0 && ((0, _base.isEmpty)(scopeFilter) || (0, _base.isEmpty)(log.scope) || logScope.includes(scopeFilter));
     }
   }, {
     key: "__logInternal",

@@ -331,12 +331,14 @@ class ChainLogger extends LoggerBase {
     return this.options.next;
   }
   canLog(log) {
-    let filter = isSomeArray(this.options.filter)
+    const filter = isSomeArray(this.options.filter)
       ? this.options.filter
       : isSomeString(this.options.filter)
       ? this.options.filter.split(",")
       : ["*"];
-
+    const scopeFilter = this.options.scopeFilter.toString().toLowerCase();
+    const logScope = log.scope.toString().toLowerCase();
+    
     return (
       filter.findIndex((x) => {
         const type = isNumber(x)
@@ -345,10 +347,9 @@ class ChainLogger extends LoggerBase {
 
         return type == "*" || type == "all" || type == log.type;
       }) >= 0 &&
-      (isEmpty(this.options.scopeFilter) ||
-        this.options.scopeFilter
-          .toLowerCase()
-          .includes(log.scope?.toLowerCase() || ""))
+      (isEmpty(scopeFilter) ||
+        isEmpty(log.scope) ||
+        logScope.includes(scopeFilter))
     );
   }
   __logInternal(log) {
