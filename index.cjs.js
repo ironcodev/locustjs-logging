@@ -186,7 +186,7 @@ var LoggerBase = /*#__PURE__*/function () {
     (0, _exception.throwIfInstantiateAbstract)(LoggerBase, this);
     this.options = Object.assign({}, options);
     this._scopes = [];
-    this.scope = '';
+    this.scope = "";
   }
   _createClass(LoggerBase, [{
     key: "getScope",
@@ -197,7 +197,7 @@ var LoggerBase = /*#__PURE__*/function () {
     key: "enterScope",
     value: function enterScope(value) {
       this._scopes.push(this.scope);
-      this.scope = (0, _base.isFunction)(value) ? value.name : (0, _base.isString)(value) ? value : '';
+      this.scope = (0, _base.isFunction)(value) ? value.name : (0, _base.isString)(value) ? value : "";
     }
   }, {
     key: "exitScope",
@@ -398,11 +398,12 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
   }, {
     key: "canLog",
     value: function canLog(log) {
+      var _log$scope;
       var filter = (0, _base.isSomeArray)(this.options.filter) ? this.options.filter : (0, _base.isSomeString)(this.options.filter) ? this.options.filter.split(",") : ["*"];
       return filter.findIndex(function (x) {
         var type = (0, _base.isNumber)(x) ? LogType.getString(x) : (x || "").toString().trim().toLowerCase();
         return type == "*" || type == "all" || type == log.type;
-      }) >= 0 && ((0, _base.isEmpty)(this.options.scopeFilter) || this.options.scopeFilter == log.scope);
+      }) >= 0 && ((0, _base.isEmpty)(this.options.scopeFilter) || this.options.scopeFilter.toLowerCase().includes(((_log$scope = log.scope) === null || _log$scope === void 0 ? void 0 : _log$scope.toLowerCase()) || ""));
     }
   }, {
     key: "__logInternal",
@@ -854,7 +855,7 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
       var _this6 = this;
       var recreate = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : false;
       this._count = 0;
-      if (this.target && (this.target.querySelectorAll('tbody tr').length == 0 || recreate)) {
+      if (this.target && (this.target.querySelectorAll("tbody tr").length == 0 || recreate)) {
         if ((0, _base.isFunction)(this.options.onInit)) {
           var result = this.options.onInit(this);
           if ((0, _base.isSomeString)(result)) {
@@ -884,7 +885,7 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
           var body = this.target.querySelector("tbody");
           if (body) {
             tr = document.createElement("TR");
-            tr.setAttribute('class', log.type);
+            tr.setAttribute("class", log.type);
             var tdRow = document.createElement("TD");
             var tdType = document.createElement("TD");
             var tdDate = document.createElement("TD");
@@ -898,18 +899,18 @@ var DOMLogger = /*#__PURE__*/function (_ChainLogger3) {
             var exception;
             try {
               if ((0, _base.isFunction)(this.options.format)) {
-                data = this.options.format(this, log, 'data');
-                exception = this.options.format(this, log, 'exception');
+                data = this.options.format(this, log, "data");
+                exception = this.options.format(this, log, "exception");
               } else {
-                data = log.data ? JSON.stringify(log.data, null, 2) : '';
-                exception = log.exception ? JSON.stringify(log.exception, null, 2) : '';
+                data = log.data ? JSON.stringify(log.data, null, 2) : "";
+                exception = log.exception ? JSON.stringify(log.exception, null, 2) : "";
               }
             } catch (err) {
               this.danger(err);
             }
             var dataHtml = (0, _htmlencode.htmlEncode)(data);
             var exceptionHtml = (0, _htmlencode.htmlEncode)(exception);
-            tdDataException.innerHTML = "".concat(data ? "<div class=\"data\" title=\"".concat(dataHtml.replace(/"/g, '&quot;'), "\">").concat(dataHtml, "</div>") : "").concat(exception ? "<div class=\"exception\" title=\"".concat(exceptionHtml.replace(/"/g, '&quot;'), "\">").concat(exceptionHtml, "</div>") : "");
+            tdDataException.innerHTML = "".concat(data ? "<div class=\"data\" title=\"".concat(dataHtml.replace(/"/g, "&quot;"), "\">").concat(dataHtml, "</div>") : "").concat(exception ? "<div class=\"exception\" title=\"".concat(exceptionHtml.replace(/"/g, "&quot;"), "\">").concat(exceptionHtml, "</div>") : "");
             tr.appendChild(tdRow);
             tr.appendChild(tdType);
             tr.appendChild(tdDate);

@@ -187,14 +187,14 @@ class LoggerBase {
 
     this.options = Object.assign({}, options);
     this._scopes = [];
-    this.scope = '';
+    this.scope = "";
   }
   getScope() {
     return this.scope;
   }
   enterScope(value) {
     this._scopes.push(this.scope);
-    this.scope = isFunction(value) ? value.name : isString(value) ? value: '';
+    this.scope = isFunction(value) ? value.name : isString(value) ? value : "";
   }
   exitScope() {
     this.scope = this._scopes.pop();
@@ -344,7 +344,11 @@ class ChainLogger extends LoggerBase {
           : (x || "").toString().trim().toLowerCase();
 
         return type == "*" || type == "all" || type == log.type;
-      }) >= 0 && (isEmpty(this.options.scopeFilter) || this.options.scopeFilter == log.scope)
+      }) >= 0 &&
+      (isEmpty(this.options.scopeFilter) ||
+        this.options.scopeFilter
+          .toLowerCase()
+          .includes(log.scope?.toLowerCase() || ""))
     );
   }
   __logInternal(log) {
@@ -388,12 +392,12 @@ class ChainLogger extends LoggerBase {
       }
     }
   }
-  _clearInternal() { }
+  _clearInternal() {}
   clear() {
     this._clearInternal();
 
     current = this.options.next;
-    
+
     while (current) {
       current.clear();
 
@@ -563,13 +567,7 @@ class ConsoleLogger extends ChainLogger {
       scope,
       host
     );
-    this._initStyle(
-      "warn",
-      this._labelWeb("magenta"),
-      date,
-      scope,
-      host
-    );
+    this._initStyle("warn", this._labelWeb("magenta"), date, scope, host);
     this._initStyle("danger", this._labelWeb("red"), date, scope, host);
     this._initStyle("success", this._labelWeb("green"), date, scope, host);
     this._initStyle("fail", this._labelWeb("darkred"), date, scope, host);
@@ -621,7 +619,7 @@ class ConsoleLogger extends ChainLogger {
   }
   _logNode(log) {
     const style = this.options.styles[log.type] || {};
-    
+
     let prefix = `${colorize(
       formatDate(log.date, this.options.dateType),
       style.date
@@ -672,7 +670,10 @@ class ConsoleLogger extends ChainLogger {
     console[method](...args);
   }
   _logWeb(log) {
-    let prefix = `%c${formatDate(log.date, this.options.dateType)} %c ${log.type.toUpperCase()} `;
+    let prefix = `%c${formatDate(
+      log.date,
+      this.options.dateType
+    )} %c ${log.type.toUpperCase()} `;
     const style = this.options.styles[log.type] || {};
     const colors = [merge(style.date, ":", ";"), merge(style.label, ":", ";")];
 
@@ -762,7 +763,7 @@ class StorageLogger extends ArrayLogger {
   }
   __logInternal(log) {
     super.__logInternal(log);
-    
+
     if (this.options.bufferSize > 0) {
       this._new_log_count++;
 
@@ -827,7 +828,10 @@ class DOMLogger extends ChainLogger {
   _init(recreate = false) {
     this._count = 0;
 
-    if (this.target && (this.target.querySelectorAll('tbody tr').length == 0 || recreate)) {
+    if (
+      this.target &&
+      (this.target.querySelectorAll("tbody tr").length == 0 || recreate)
+    ) {
       if (isFunction(this.options.onInit)) {
         const result = this.options.onInit(this);
 
@@ -876,7 +880,7 @@ class DOMLogger extends ChainLogger {
         if (body) {
           tr = document.createElement("TR");
 
-          tr.setAttribute('class', log.type);
+          tr.setAttribute("class", log.type);
 
           const tdRow = document.createElement("TD");
           const tdType = document.createElement("TD");
@@ -896,11 +900,13 @@ class DOMLogger extends ChainLogger {
 
           try {
             if (isFunction(this.options.format)) {
-              data = this.options.format(this, log, 'data');
-              exception = this.options.format(this, log, 'exception');
+              data = this.options.format(this, log, "data");
+              exception = this.options.format(this, log, "exception");
             } else {
-              data = log.data ? JSON.stringify(log.data, null, 2): '';
-              exception = log.exception ? JSON.stringify(log.exception, null, 2): '';
+              data = log.data ? JSON.stringify(log.data, null, 2) : "";
+              exception = log.exception
+                ? JSON.stringify(log.exception, null, 2)
+                : "";
             }
           } catch (err) {
             this.danger(err);
@@ -910,9 +916,19 @@ class DOMLogger extends ChainLogger {
           const exceptionHtml = htmlEncode(exception);
 
           tdDataException.innerHTML = `${
-            data ? `<div class="data" title="${dataHtml.replace(/"/g, '&quot;')}">${dataHtml}</div>` : ""
+            data
+              ? `<div class="data" title="${dataHtml.replace(
+                  /"/g,
+                  "&quot;"
+                )}">${dataHtml}</div>`
+              : ""
           }${
-            exception ? `<div class="exception" title="${exceptionHtml.replace(/"/g, '&quot;')}">${exceptionHtml}</div>` : ""
+            exception
+              ? `<div class="exception" title="${exceptionHtml.replace(
+                  /"/g,
+                  "&quot;"
+                )}">${exceptionHtml}</div>`
+              : ""
           }`;
 
           tr.appendChild(tdRow);
@@ -1043,11 +1059,12 @@ class DynamicLogger extends LoggerBase {
 
         break;
       case "array":
-        fallback = () => new ArrayLogger({
-          host: this.options.host,
-          next: this.options.next,
-          ...this.options.array,
-        });
+        fallback = () =>
+          new ArrayLogger({
+            host: this.options.host,
+            next: this.options.next,
+            ...this.options.array,
+          });
 
         break;
       case "localstorage":
@@ -1102,7 +1119,6 @@ export {
   formatDate,
   merge,
   colorize,
-  
   LoggerBase,
   ChainLogger,
   ArrayLogger,
@@ -1113,7 +1129,6 @@ export {
   LocalStorageLogger,
   SessionStorageLogger,
   DynamicLogger,
-
   NoLoggerFactoryException,
   InvalidLoggerTypeException,
   InvalidLoggerException,
