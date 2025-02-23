@@ -5,11 +5,10 @@ import {
   isSomeString,
   isFunction,
   isjQueryElement,
-  isNull,
   isNumeric,
-  isAnObject,
   isSomeArray,
   isNumber,
+  isNullOrEmpty,
 } from "@locustjs/base";
 import {
   LocalStorageJson,
@@ -23,7 +22,7 @@ import {
   throwNotImplementedException,
   throwNotSupportedException,
 } from "@locustjs/exception";
-import Enum from "@locustjs/enum";
+import { Enum } from "@locustjs/enum";
 import { htmlEncode } from "@locustjs/htmlencode";
 
 const LogType = Enum.define(
@@ -217,7 +216,7 @@ class LoggerBase {
     const arg0 = data.length > 0 ? data[0] : undefined;
 
     if (
-      isAnObject(arg0) &&
+      isObject(arg0) &&
       (arg0 instanceof Exception || arg0 instanceof Error)
     ) {
       result = new Log(
@@ -312,7 +311,7 @@ class ChainLogger extends LoggerBase {
 
     throwIfInstantiateAbstract(ChainLogger, this);
 
-    if (isNull(this.options.next)) {
+    if (isNullOrEmpty(this.options.next)) {
       this.options.next = new NullLogger();
     }
 

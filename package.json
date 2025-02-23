@@ -1,6 +1,6 @@
 {
   "name": "@locustjs/logging",
-  "version": "3.1.1",
+  "version": "3.1.2",
   "description": "This library provides various types of loggers that could be employed in any type of javascript application.",
   "main": "index.cjs.js",
   "module": "index.esm.js",
@@ -37,16 +37,16 @@
     "parcel": "^2.7.0",
     "util": "^0.12.5"
   },
-  "dependencies": {
-    "@locustjs/base": "^4.0.0",
-    "@locustjs/enum": "^2.0.0",
-    "@locustjs/exception": "^2.0.2",
-    "@locustjs/htmlencode": "^1.0.1",
-    "@locustjs/storage": "^2.0.1"
-  },
   "alias": {
     "process": {
       "global": "{}"
     }
+  },
+  "dependencies": {
+    "@locustjs/base": "^4.4.1",
+    "@locustjs/enum": "^3.0.0",
+    "@locustjs/exception": "^2.3.0",
+    "@locustjs/htmlencode": "^1.0.1",
+    "@locustjs/storage": "^2.0.1"
   }
 }

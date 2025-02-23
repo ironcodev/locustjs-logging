@@ -11,9 +11,8 @@ exports.merge = merge;
 var _base = require("@locustjs/base");
 var _storage = require("@locustjs/storage");
 var _exception = require("@locustjs/exception");
-var _enum = _interopRequireDefault(require("@locustjs/enum"));
+var _enum = require("@locustjs/enum");
 var _htmlencode = require("@locustjs/htmlencode");
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
 function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); enumerableOnly && (symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; })), keys.push.apply(keys, symbols); } return keys; }
 function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = null != arguments[i] ? arguments[i] : {}; i % 2 ? ownKeys(Object(source), !0).forEach(function (key) { _defineProperty(target, key, source[key]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)) : ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } return target; }
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -36,7 +35,7 @@ function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) ===
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
 function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
-var LogType = _enum["default"].define({
+var LogType = _enum.Enum.define({
   info: 0,
   log: 1,
   debug: 2,
@@ -226,7 +225,7 @@ var LoggerBase = /*#__PURE__*/function () {
         data[_key2 - 1] = arguments[_key2];
       }
       var arg0 = data.length > 0 ? data[0] : undefined;
-      if ((0, _base.isAnObject)(arg0) && (arg0 instanceof _exception.Exception || arg0 instanceof Error)) {
+      if ((0, _base.isObject)(arg0) && (arg0 instanceof _exception.Exception || arg0 instanceof Error)) {
         result = _construct(Log, [type, this.options.host, this.scope, arg0].concat(_toConsumableArray(data.slice(1))));
       } else {
         result = _construct(Log, [type, this.options.host, this.scope, undefined].concat(data));
@@ -381,7 +380,7 @@ var ChainLogger = /*#__PURE__*/function (_LoggerBase) {
     _classCallCheck(this, ChainLogger);
     _this = _super4.call(this, options);
     (0, _exception.throwIfInstantiateAbstract)(ChainLogger, _assertThisInitialized(_this));
-    if ((0, _base.isNull)(_this.options.next)) {
+    if ((0, _base.isNullOrEmpty)(_this.options.next)) {
       _this.options.next = new NullLogger();
     }
     (0, _exception.throwIfNotInstanceOf)("options.next", LoggerBase, _this.options.next, _this.host);
